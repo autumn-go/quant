@@ -48,3 +48,5 @@ python data-collector/scheduler.py
 3. **回测引擎**: 事件驱动回测、绩效分析
 4. **实时监控**: 策略信号、持仓跟踪
 5. **可视化**: K线图、收益曲线、风险指标# Trigger redeploy
+
+Updated: Thu Feb 26 11:14:54 PM CST 2026
