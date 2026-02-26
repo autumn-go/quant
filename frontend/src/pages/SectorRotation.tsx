@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Flame, TrendingUp, Zap } from 'lucide-react';
-import { marketAPI } from '../../api';
+import { marketAPI } from '../api';
 import './SectorRotation.css';
 
 interface Sector {

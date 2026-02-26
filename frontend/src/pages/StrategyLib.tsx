@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Play, Edit2, Trash2, X } from 'lucide-react';
-import StrategyEditor from '../../components/StrategyEditor';
+import StrategyEditor from '../components/StrategyEditor';
 import './StrategyLib.css';
 
 const strategies = [

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { TrendingUp, TrendingDown, Activity, BarChart3, Zap, Target } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { marketAPI, strategyAPI } from '../../api';
+import { marketAPI, strategyAPI } from '../api';
 import './Dashboard.css';
 
 interface MarketIndex {

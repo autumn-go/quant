@@ -1,5 +1,5 @@
 // 策略代码编辑器
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Editor from '@monaco-editor/react';
 import { Play, Save, FileCode, Settings, ChevronDown, ChevronRight } from 'lucide-react';
 import './StrategyEditor.css';
