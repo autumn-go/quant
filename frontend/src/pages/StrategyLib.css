@@ -4,6 +4,22 @@
   gap: 24px;
 }
 
+.editor-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.editor-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.editor-container {
+  flex: 1;
+  min-height: 600px;
+}
+
 .strategy-actions {
   display: flex;
   justify-content: flex-end;
