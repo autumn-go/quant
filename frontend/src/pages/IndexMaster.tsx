@@ -1,7 +1,6 @@
 // 指数大师 - 指数择时
 import React from 'react';
-import { TrendingUp, TrendingDown, Activity, Calendar } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Bar } from 'recharts';
+import { Activity, Calendar } from 'lucide-react';
 import './IndexMaster.css';
 
 const indexList = [

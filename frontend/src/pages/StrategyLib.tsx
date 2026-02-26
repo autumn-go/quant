@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Plus, Play, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Play, Edit2, Trash2 } from 'lucide-react';
 import './StrategyLib.css';
 
 const strategies = [

@@ -1,7 +1,7 @@
 // 总览仪表盘
 import React from 'react';
 import { TrendingUp, TrendingDown, Activity, BarChart3, Zap, Target } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import './Dashboard.css';
 
 // 模拟数据
@@ -47,7 +47,7 @@ const Dashboard: React.FC = () => {
 
       {/* 市场指数卡片 */}
       <div className="market-grid">
-        {marketData.map((item, index) => (
+        {marketData.map((item) => (
           <div 
             key={item.name}
             className="market-card glass-card animate-fade-in"

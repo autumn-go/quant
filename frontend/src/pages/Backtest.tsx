@@ -1,5 +1,5 @@
 import React from 'react';
-import { TestTube, Play, RotateCcw, CheckCircle } from 'lucide-react';
+import { Play } from 'lucide-react';
 import './Backtest.css';
 
 const backtests = [

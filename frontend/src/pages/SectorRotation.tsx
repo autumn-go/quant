@@ -1,5 +1,5 @@
 import React from 'react';
-import { RotateCcw, Flame, TrendingUp, Zap } from 'lucide-react';
+import { Flame, TrendingUp, Zap } from 'lucide-react';
 import './SectorRotation.css';
 
 const sectors = [

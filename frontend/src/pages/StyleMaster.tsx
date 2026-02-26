@@ -1,5 +1,5 @@
 import React from 'react';
-import { PieChart, TrendingUp, Shield, Target } from 'lucide-react';
+import { TrendingUp, Shield } from 'lucide-react';
 import './StyleMaster.css';
 
 const styleData = [

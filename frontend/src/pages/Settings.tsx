@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, Database, Bell, Shield, User } from 'lucide-react';
+import { Database, Bell, Shield, User } from 'lucide-react';
 import './Settings.css';
 
 const SettingsPage: React.FC = () => (
