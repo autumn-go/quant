@@ -47,11 +47,11 @@ const Dashboard: React.FC = () => {
 
       {/* 市场指数卡片 */}
       <div className="market-grid">
-        {marketData.map((item) => (
+        {marketData.map((item, idx) => (
           <div 
             key={item.name}
             className="market-card glass-card animate-fade-in"
-            style={{ animationDelay: `${index * 0.1}s` }}
+            style={{ animationDelay: `${idx * 0.1}s` }}
           >
             <div className="market-header">
               <span className="market-name">{item.name}</span>
@@ -140,7 +140,7 @@ const Dashboard: React.FC = () => {
           </div>
           
           <div className="stats-list">
-            {strategyStats.map((stat, index) => (
+            {strategyStats.map((stat) => (
               <div key={stat.name} className="stat-item">
                 <div className="stat-info">
                   <span className="stat-name">{stat.name}</span>
