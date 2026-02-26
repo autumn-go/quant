@@ -1,0 +1,74 @@
+.style-master {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.style-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.style-card {
+  padding: 24px;
+}
+
+.style-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.style-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--primary), var(--info));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bg-primary);
+}
+
+.style-name {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.style-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.style-weight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.weight-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.weight-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--info));
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.weight-value {
+  font-size: 16px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  color: var(--primary);
+  min-width: 50px;
+  text-align: right;
+}

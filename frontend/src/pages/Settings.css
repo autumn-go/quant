@@ -1,0 +1,53 @@
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.setting-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.setting-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.setting-icon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, var(--primary), var(--info));
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bg-primary);
+  flex-shrink: 0;
+}
+
+.setting-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.setting-name {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.setting-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+}

@@ -1,0 +1,89 @@
+.sector-rotation {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.sector-card {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sector-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.sector-trend {
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.sector-trend.up {
+  background: rgba(0, 255, 136, 0.1);
+  color: var(--success);
+}
+
+.sector-trend.down {
+  background: rgba(255, 71, 87, 0.1);
+  color: var(--danger);
+}
+
+.sector-trend.neutral {
+  background: rgba(255, 170, 0, 0.1);
+  color: var(--warning);
+}
+
+.sector-change {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.sector-change .up {
+  color: var(--success);
+}
+
+.sector-change .down {
+  color: var(--danger);
+}
+
+.sector-heat {
+  margin-top: 4px;
+}
+
+.heat-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.heat-bar {
+  height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.heat-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}

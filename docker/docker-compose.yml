@@ -1,0 +1,140 @@
+version: '3.8'
+
+services:
+  # PostgreSQL - 主数据库 (用户、策略、回测记录)
+  postgres:
+    image: postgres:16-alpine
+    container_name: quant-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-quant}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-quant123}
+      POSTGRES_DB: ${POSTGRES_DB:-quant_platform}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init/postgres:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-quant} -d ${POSTGRES_DB:-quant_platform}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - quant-network
+
+  # TimescaleDB - 时序数据库 (行情数据)
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: quant-timescaledb
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${TSDB_USER:-quant}
+      POSTGRES_PASSWORD: ${TSDB_PASSWORD:-quant123}
+      POSTGRES_DB: ${TSDB_DB:-quant_market}
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+      - ./init/timescaledb:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "${TSDB_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${TSDB_USER:-quant} -d ${TSDB_DB:-quant_market}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - quant-network
+
+  # Redis - 缓存和任务队列
+  redis:
+    image: redis:7-alpine
+    container_name: quant-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-quant123}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - quant-network
+
+  # MinIO - 对象存储 (回测结果、日志)
+  minio:
+    image: minio/minio:latest
+    container_name: quant-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER:-quant}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-quant123456}
+      MINIO_BROWSER: "on"
+    volumes:
+      - minio_data:/data
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - quant-network
+
+  # MinIO Client - 自动创建buckets
+  minio-mc:
+    image: minio/mc:latest
+    container_name: quant-minio-mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 10;
+      mc alias set local http://minio:9000 ${MINIO_USER:-quant} ${MINIO_PASSWORD:-quant123456};
+      mc mb -p local/backtest-results;
+      mc mb -p local/logs;
+      mc mb -p local/strategies;
+      mc mb -p local/exports;
+      mc policy set public local/backtest-results;
+      exit 0;
+      "
+    networks:
+      - quant-network
+
+  # PgAdmin - PostgreSQL管理工具 (可选)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: quant-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@quant.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    depends_on:
+      - postgres
+      - timescaledb
+    networks:
+      - quant-network
+
+volumes:
+  postgres_data:
+    driver: local
+  timescaledb_data:
+    driver: local
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
+
+networks:
+  quant-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
