@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, TrendingUp, Activity, Clock, BarChart2, ArrowDown, ArrowUp, AlertCircle } from 'lucide-react';
+import { Search, TrendingUp, Activity, Clock, BarChart2, ArrowUp, AlertCircle } from 'lucide-react';
 import './StockAnalysis.css';
 
 // 子模块配置
