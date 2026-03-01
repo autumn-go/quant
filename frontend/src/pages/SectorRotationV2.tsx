@@ -8,7 +8,8 @@ import {
   Filter,
   AlertCircle,
   Layers,
-  Sparkles
+  Sparkles,
+  BookOpen
 } from 'lucide-react';
 import './SectorRotationV2.css';
 
@@ -187,6 +188,15 @@ const SectorRotationV2: React.FC = () => {
             <p>K-Means聚类 + 微观阻力打分系统</p>
           </div>
         </div>
+        <a 
+          href="/sector_rotation_algorithm.md" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="algorithm-link"
+        >
+          <BookOpen size={18} />
+          <span>算法说明</span>
+        </a>
       </div>
 
       {/* 统计卡片 */}
