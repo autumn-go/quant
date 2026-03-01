@@ -40,13 +40,20 @@ const OversoldAnalysis: React.FC = () => {
   const fetchOversoldETFs = async () => {
     setLoading(true); setError(null);
     try {
-      const res = await fetch('/api/etf/oversold?rsi_threshold=20&rsi_period=rsi_6&limit=500');
+      // 从静态JSON文件读取数据（Vercel部署方案）
+      const res = await fetch('/etf_oversold.json');
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const result = await res.json();
-      if (result.error) throw new Error(result.error);
-      const filtered = (result.data || []).filter((e: ETFOversoldData) => e.rsi_6 != null && e.rsi_6 < 20);
-      const sorted = filtered.sort((a: ETFOversoldData, b: ETFOversoldData) => a.rsi_6 - b.rsi_6);
-      setAllData(sorted); setCurrentPage(1);
+      
+      if (result.data && result.data.length > 0) {
+        // 过滤RSI6 < 20的数据并排序
+        const filtered = result.data.filter((e: ETFOversoldData) => e.rsi_6 != null && e.rsi_6 < 20);
+        const sorted = filtered.sort((a: ETFOversoldData, b: ETFOversoldData) => a.rsi_6 - b.rsi_6);
+        setAllData(sorted); setCurrentPage(1);
+      } else {
+        setAllData([]);
+        setError('暂无超跌ETF数据');
+      }
     } catch (e) {
       setError(`获取数据失败: ${e instanceof Error ? e.message : '未知错误'}`);
       setAllData([]);
