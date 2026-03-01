@@ -194,6 +194,27 @@
   margin: 32px 0;
 }
 
+/* KaTeX 公式样式 */
+.doc-content .katex {
+  font-size: 1.1em;
+}
+
+.doc-content .katex-display {
+  margin: 24px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.doc-content .katex-display .katex {
+  font-size: 1.2em;
+}
+
+/* 行内公式 */
+.doc-content p .katex {
+  font-size: 1em;
+  padding: 0 4px;
+}
+
 /* 响应式 */
 @media (max-width: 768px) {
   .markdown-doc {

@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 import { ArrowLeft, BookOpen, Loader2 } from 'lucide-react';
 import './MarkdownDoc.css';
 
@@ -78,7 +81,10 @@ const MarkdownDoc: React.FC = () => {
       </header>
       
       <article className="doc-content">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        <ReactMarkdown 
+          remarkPlugins={[remarkGfm, remarkMath]}
+          rehypePlugins={[rehypeKatex]}
+        >
           {content}
         </ReactMarkdown>
       </article>
