@@ -2,8 +2,8 @@ name: Daily ETF Data Update
 
 on:
   schedule:
-    # 每天北京时间 15:30 运行（收盘后）
-    - cron: '30 7 * * 1-5'
+    # 每天北京时间 18:00 运行（收盘后）
+    - cron: '0 10 * * 1-5'
   workflow_dispatch:  # 允许手动触发
 
 jobs:
