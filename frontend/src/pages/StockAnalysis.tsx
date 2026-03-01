@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, TrendingUp, Activity, Clock, BarChart2, ArrowUp, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, TrendingUp, Activity, Clock, BarChart2, ArrowUp, AlertCircle, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 import './StockAnalysis.css';
 
 const subModules = [
@@ -20,17 +20,32 @@ interface ETFOversoldData {
   trade_date: string;
 }
 
+const getTodayStr = () => {
+  const now = new Date();
+  return `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+};
+
+const getLastTradeDate = () => {
+  const now = new Date();
+  const day = now.getDay();
+  if (day === 0) now.setDate(now.getDate() - 2);
+  else if (day === 6) now.setDate(now.getDate() - 1);
+  return `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+};
+
 const OversoldAnalysis: React.FC = () => {
   const [allData, setAllData] = useState<ETFOversoldData[]>([]);
   const [displayData, setDisplayData] = useState<ETFOversoldData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dataDate, setDataDate] = useState<string>('');
+  const [isLatest, setIsLatest] = useState<boolean>(true);
   const [sortBy, setSortBy] = useState<'rsi_6' | 'rsi_12' | 'rsi_24'>('rsi_6');
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
   useEffect(() => { fetchOversoldETFs(); }, []);
-
   useEffect(() => {
     const sorted = [...allData].sort((a, b) => a[sortBy] - b[sortBy]);
     const start = (currentPage - 1) * pageSize;
@@ -40,38 +55,54 @@ const OversoldAnalysis: React.FC = () => {
   const fetchOversoldETFs = async () => {
     setLoading(true); setError(null);
     try {
-      // 从静态JSON文件读取数据（Vercel部署方案）
-      const res = await fetch('/etf_oversold.json');
+      const res = await fetch('/etf_oversold.json?t=' + Date.now());
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const result = await res.json();
-      
-      if (result.data && result.data.length > 0) {
-        // 过滤RSI6 < 20的数据并排序
+      if (result.data?.length > 0) {
         const filtered = result.data.filter((e: ETFOversoldData) => e.rsi_6 != null && e.rsi_6 < 20);
-        const sorted = filtered.sort((a: ETFOversoldData, b: ETFOversoldData) => a.rsi_6 - b.rsi_6);
-        setAllData(sorted); setCurrentPage(1);
+        setAllData(filtered.sort((a: ETFOversoldData, b: ETFOversoldData) => a.rsi_6 - b.rsi_6));
+        setCurrentPage(1);
+        const latestDate = result.data[0]?.trade_date || '';
+        setDataDate(latestDate);
+        setIsLatest(latestDate === getTodayStr() || latestDate === getLastTradeDate());
       } else {
-        setAllData([]);
-        setError('暂无超跌ETF数据');
+        setAllData([]); setError('暂无超跌ETF数据');
       }
     } catch (e) {
-      setError(`获取数据失败: ${e instanceof Error ? e.message : '未知错误'}`);
-      setAllData([]);
+      setError(`获取数据失败: ${e instanceof Error ? e.message : '未知错误'}`); setAllData([]);
     } finally { setLoading(false); }
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    if (isLatest) {
+      await fetchOversoldETFs();
+    } else {
+      setError('数据更新需要在服务端执行，请联系管理员更新数据');
+    }
+    setRefreshing(false);
+  };
+
   const handleSort = (key: 'rsi_6' | 'rsi_12' | 'rsi_24') => { setSortBy(key); setCurrentPage(1); };
-  const getRSIColor = (rsi: number) => { if (rsi < 10) return 'extreme'; if (rsi < 15) return 'danger'; if (rsi < 20) return 'warning'; return 'normal'; };
+  const getRSIColor = (rsi: number) => rsi < 10 ? 'extreme' : rsi < 15 ? 'danger' : rsi < 20 ? 'warning' : 'normal';
   const totalPages = Math.ceil(allData.length / pageSize);
 
   return (
     <div className="oversold-panel">
       <div className="strategy-header">
         <div className="strategy-title"><AlertCircle size={24} /><h3>ETF超跌透视策略</h3></div>
-        <p className="strategy-desc">基于ETF日K行情的RSI相对强弱指标，筛选RSI6 &lt; 20的超跌品种，按RSI值升序排列。</p>
-        <div className="strategy-tags">
-          <span className="tag">RSI6 &lt; 20</span><span className="tag">超卖区域</span><span className="tag">反弹潜力</span>
+        <div className="header-actions">
+          <span className="data-date">数据日期: {dataDate || '-'}</span>
+          <button className={`refresh-btn ${refreshing ? 'spinning' : ''} ${!isLatest ? 'needs-update' : ''}`} onClick={handleRefresh} disabled={refreshing}>
+            <RefreshCw size={18} />{refreshing ? '刷新中...' : '刷新'}
+          </button>
         </div>
+      </div>
+      
+      <p className="strategy-desc">基于ETF日K行情的RSI相对强弱指标，筛选RSI6 &lt; 20的超跌品种。</p>
+      <div className="strategy-tags">
+        <span className="tag">RSI6 &lt; 20</span><span className="tag">超卖区域</span><span className="tag">反弹潜力</span>
+        {!isLatest && <span className="tag warning">数据需更新</span>}
       </div>
 
       <div className="stats-cards">
@@ -126,7 +157,7 @@ const OversoldAnalysis: React.FC = () => {
 const PlaceholderModule: React.FC<{ name: string; desc: string }> = ({ name, desc }) => (
   <div className="placeholder-module">
     <div className="placeholder-icon-large"><Activity size={64} /></div>
-    <h3>{name}</h3><p>{desc}</p><div className="coming-soon">功能开发中...</div>
+    <h3>{name}</h3><p>{desc}><div className="coming-soon">功能开发中...</div>
   </div>
 );
 
@@ -144,15 +175,12 @@ const StockAnalysis: React.FC = () => {
         <button className="btn btn-primary">分析</button>
       </div>
       <div className="submodule-tabs">
-        {subModules.map((mod) => {
-          const Icon = mod.icon;
-          return (
-            <button key={mod.id} className={`submodule-tab ${activeTab === mod.id ? 'active' : ''}`} onClick={() => setActiveTab(mod.id)}>
-              <Icon size={18} />
-              <div className="tab-content"><span className="tab-name">{mod.name}</span><span className="tab-desc">{mod.desc}</span></div>
-            </button>
-          );
-        })}
+        {subModules.map((mod) => (
+          <button key={mod.id} className={`submodule-tab ${activeTab === mod.id ? 'active' : ''}`} onClick={() => setActiveTab(mod.id)}>
+            <mod.icon size={18} />
+            <div className="tab-content"><span className="tab-name">{mod.name}</span><span className="tab-desc">{mod.desc}</span></div>
+          </button>
+        ))}
       </div>
       <div className="analysis-content glass-card">
         {activeTab === 'oversold' ? <OversoldAnalysis /> : <PlaceholderModule name={activeModule?.name || ''} desc={activeModule?.desc || ''} />}
