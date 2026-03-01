@@ -12,6 +12,7 @@ from pydantic import BaseModel
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from shared.models_sqlite import init_db, get_session, Stock, DailyPrice
+from routers.backtest import router as backtest_router
 
 app = FastAPI(title="QuantPro API", version="1.0.0")
 
@@ -51,6 +52,10 @@ class PriceData(BaseModel):
 
 # 初始化数据库
 engine = init_db()
+
+# 注册路由
+from routers.backtest import router as backtest_router
+app.include_router(backtest_router)
 
 @app.get("/health")
 def health():

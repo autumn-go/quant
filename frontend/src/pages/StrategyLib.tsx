@@ -29,12 +29,6 @@ const StrategyLib: React.FC = () => {
     // TODO: 调用 API 保存
   };
 
-  const handleRunBacktest = async (code: string, params: Record<string, any>) => {
-    console.log('运行回测:', code, params);
-    // TODO: 调用 API 执行回测
-    return new Promise((resolve) => setTimeout(resolve, 2000));
-  };
-
   if (showEditor) {
     return (
       <div className="strategy-lib">
@@ -50,7 +44,6 @@ const StrategyLib: React.FC = () => {
           <StrategyEditor
             initialCode={editingStrategy?.code}
             onSave={handleSaveStrategy}
-            onRun={handleRunBacktest}
           />
         </div>
       </div>

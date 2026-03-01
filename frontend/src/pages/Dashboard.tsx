@@ -1,6 +1,15 @@
-// 更新后的 Dashboard - 使用真实 API
+// 总览仪表盘 - 新版设计
 import React, { useEffect, useState } from 'react';
-import { TrendingUp, TrendingDown, Activity, BarChart3, Zap, Target } from 'lucide-react';
+import { 
+  Activity, 
+  BarChart3, 
+  Zap, 
+  Target,
+  Flame,
+  PieChart,
+  ArrowUpRight,
+  ArrowDownRight
+} from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { marketAPI, strategyAPI } from '../api';
 import './Dashboard.css';
@@ -11,6 +20,15 @@ interface MarketIndex {
   value: number;
   change: number;
   trend: string;
+  signal: string;
+}
+
+interface LimitUpStock {
+  rank: number;
+  name: string;
+  code: string;
+  limitUpDays: number;
+  concept: string;
 }
 
 interface StrategyStat {
@@ -55,19 +73,35 @@ const Dashboard: React.FC = () => {
     };
 
     fetchData();
-    // 每 30 秒刷新一次
     const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  // 模拟图表数据（后续用真实数据）
+  // 模拟涨停梯队数据
+  const limitUpStocks: LimitUpStock[] = [
+    { rank: 1, name: '东方精工', code: '002611.SZ', limitUpDays: 5, concept: '机器人' },
+    { rank: 2, name: '四川金顶', code: '600678.SH', limitUpDays: 4, concept: '氢能源' },
+    { rank: 3, name: '康普顿', code: '603798.SH', limitUpDays: 3, concept: '氢能源' },
+    { rank: 4, name: '达意隆', code: '002209.SZ', limitUpDays: 3, concept: '机器人' },
+    { rank: 5, name: '神驰机电', code: '603109.SH', limitUpDays: 2, concept: '新能源汽车' },
+  ];
+
+  // 模拟市场风格数据
+  const marketStyle = {
+    largeCap: { value: 45, trend: 'up' },
+    smallCap: { value: 55, trend: 'down' },
+    growth: { value: 60, trend: 'up' },
+    value: { value: 40, trend: 'down' },
+  };
+
+  // 模拟图表数据
   const chartData = [
-    { time: '09:30', value: 4140 },
-    { time: '10:30', value: 4150 },
-    { time: '11:30', value: 4145 },
-    { time: '13:00', value: 4148 },
-    { time: '14:00', value: 4142 },
-    { time: '15:00', value: 4146 },
+    { time: '09:30', value: 4140, volume: 1200 },
+    { time: '10:30', value: 4150, volume: 1500 },
+    { time: '11:30', value: 4145, volume: 1100 },
+    { time: '13:00', value: 4148, volume: 1300 },
+    { time: '14:00', value: 4142, volume: 1400 },
+    { time: '15:00', value: 4146, volume: 1600 },
   ];
 
   if (loading) {
@@ -76,71 +110,153 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="dashboard">
-      <div className="welcome-section animate-fade-in">
-        <h1>欢迎回来，<span className="gradient-text">QuantPro</span></h1>
-        <p>今日市场概览 · {new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}</p>
+      {/* 页面标题 */}
+      <div className="dashboard-header">
+        <h1>市场总览</h1>
+        <p>{new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}</p>
       </div>
 
-      <div className="market-grid">
-        {marketData.map((item, idx) => (
-          <div 
-            key={item.code}
-            className="market-card glass-card animate-fade-in"
-            style={{ animationDelay: `${idx * 0.1}s` }}
-          >
-            <div className="market-header">
-              <span className="market-name">{item.name}</span>
-              {item.change >= 0 ? (
-                <TrendingUp className="trend-icon up" size={18} />
-              ) : (
-                <TrendingDown className="trend-icon down" size={18} />
-              )}
-            </div>
-            <div className="market-value">{item.value.toLocaleString()}</div>
-            <div className={`market-change ${item.change >= 0 ? 'up' : 'down'}`}>
-              {item.change >= 0 ? '+' : ''}{item.change}%
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="chart-section animate-fade-in delay-200">
-        <div className="chart-card glass-card">
-          <div className="chart-header">
-            <div className="chart-title">
-              <Activity size={18} />
-              <span>上证指数分时走势</span>
-            </div>
-            <div className="chart-tabs">
-              <button className="tab active">分时</button>
-              <button className="tab">日K</button>
-              <button className="tab">周K</button>
-            </div>
+      {/* 第一行：大盘择时 + 市场风格 */}
+      <div className="dashboard-row">
+        {/* 大盘择时判断 */}
+        <div className="dashboard-card market-timing">
+          <div className="card-header">
+            <Activity size={18} />
+            <span>大盘择时判断</span>
           </div>
           
-          <div className="chart-container">
-            <ResponsiveContainer width="100%" height={300}>
+          <div className="timing-chart">
+            <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#00d4ff" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#00d4ff" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#000000" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#000000" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,212,255,0.1)" />
-                <XAxis dataKey="time" stroke="#64748b" fontSize={12} tickLine={false} />
-                <YAxis domain={['dataMin - 10', 'dataMax + 10']} stroke="#64748b" fontSize={12} tickLine={false} />
-                <Tooltip contentStyle={{ background: '#111827', border: '1px solid rgba(0,212,255,0.3)', borderRadius: '8px', color: '#fff' }} />
-                <Area type="monotone" dataKey="value" stroke="#00d4ff" strokeWidth={2} fillOpacity={1} fill="url(#colorValue)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
+                <XAxis dataKey="time" stroke="#94a3b8" fontSize={11} tickLine={false} />
+                <YAxis domain={['dataMin - 10', 'dataMax + 10']} stroke="#94a3b8" fontSize={11} tickLine={false} />
+                <Tooltip contentStyle={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '12px' }} />
+                <Area type="monotone" dataKey="value" stroke="#000000" strokeWidth={1.5} fillOpacity={1} fill="url(#colorValue)" />
               </AreaChart>
             </ResponsiveContainer>
+          </div>
+
+          <div className="timing-indices">
+            {marketData.slice(0, 4).map((item) => (
+              <div key={item.code} className="timing-item">
+                <div className="timing-name">{item.name}</div>
+                <div className="timing-value">{item.value.toLocaleString()}</div>
+                <div className={`timing-change ${item.change >= 0 ? 'up' : 'down'}`}>
+                  {item.change >= 0 ? '+' : ''}{item.change}%
+                </div>
+                <div className={`timing-signal ${item.signal === '看多' ? 'bull' : item.signal === '看空' ? 'bear' : 'neutral'}`}>
+                  {item.signal}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 当前市场风格 */}
+        <div className="dashboard-card market-style">
+          <div className="card-header">
+            <PieChart size={18} />
+            <span>当前市场风格</span>
+          </div>
+          
+          <div className="style-grid">
+            <div className="style-item">
+              <div className="style-label">大盘风格</div>
+              <div className="style-bar-container">
+                <div className="style-bar-bg">
+                  <div className="style-bar" style={{ width: `${marketStyle.largeCap.value}%` }} />
+                </div>
+                <span className="style-percent">{marketStyle.largeCap.value}%</span>
+              </div>
+              <div className={`style-trend ${marketStyle.largeCap.trend}`}>
+                {marketStyle.largeCap.trend === 'up' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+              </div>
+            </div>
+
+            <div className="style-item">
+              <div className="style-label">小盘风格</div>
+              <div className="style-bar-container">
+                <div className="style-bar-bg">
+                  <div className="style-bar" style={{ width: `${marketStyle.smallCap.value}%` }} />
+                </div>
+                <span className="style-percent">{marketStyle.smallCap.value}%</span>
+              </div>
+              <div className={`style-trend ${marketStyle.smallCap.trend}`}>
+                {marketStyle.smallCap.trend === 'up' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+              </div>
+            </div>
+
+            <div className="style-item">
+              <div className="style-label">成长风格</div>
+              <div className="style-bar-container">
+                <div className="style-bar-bg">
+                  <div className="style-bar" style={{ width: `${marketStyle.growth.value}%` }} />
+                </div>
+                <span className="style-percent">{marketStyle.growth.value}%</span>
+              </div>
+              <div className={`style-trend ${marketStyle.growth.trend}`}>
+                {marketStyle.growth.trend === 'up' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+              </div>
+            </div>
+
+            <div className="style-item">
+              <div className="style-label">价值风格</div>
+              <div className="style-bar-container">
+                <div className="style-bar-bg">
+                  <div className="style-bar" style={{ width: `${marketStyle.value.value}%` }} />
+                </div>
+                <span className="style-percent">{marketStyle.value.value}%</span>
+              </div>
+              <div className={`style-trend ${marketStyle.value.trend}`}>
+                {marketStyle.value.trend === 'up' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="bottom-grid">
-        <div className="strategy-stats glass-card animate-fade-in delay-300">
-          <div className="section-header">
+      {/* 第二行：涨停梯队 */}
+      <div className="dashboard-card limit-up">
+        <div className="card-header">
+          <Flame size={18} />
+          <span>涨停梯队</span>
+        </div>
+        
+        <div className="limit-up-table">
+          <div className="table-header">
+            <span>排名</span>
+            <span>股票名称</span>
+            <span>代码</span>
+            <span>连板天数</span>
+            <span>概念板块</span>
+          </div>
+          {limitUpStocks.map((stock) => (
+            <div key={stock.code} className="table-row">
+              <span className="rank">{stock.rank}</span>
+              <span className="stock-name">{stock.name}</span>
+              <span className="stock-code">{stock.code}</span>
+              <span className="limit-up-days">
+                <Flame size={14} className="flame-icon" />
+                {stock.limitUpDays}天
+              </span>
+              <span className="concept">{stock.concept}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 第三行：策略统计 + 最新信号 */}
+      <div className="dashboard-row">
+        {/* 策略统计 */}
+        <div className="dashboard-card strategy-stats">
+          <div className="card-header">
             <BarChart3 size={18} />
             <span>策略统计</span>
           </div>
@@ -152,8 +268,8 @@ const Dashboard: React.FC = () => {
                   <span className="stat-name">{stat.name}</span>
                   <span className="stat-count">{stat.active}/{stat.count} 运行中</span>
                 </div>
-                <div className="stat-bar">
-                  <div className="stat-progress" style={{ width: `${(stat.active / stat.count) * 100}%` }} />
+                <div className="stat-bar-bg">
+                  <div className="stat-bar" style={{ width: `${(stat.active / stat.count) * 100}%` }} />
                 </div>
                 <span className="stat-return">{stat.return}</span>
               </div>
@@ -161,8 +277,9 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="recent-signals glass-card animate-fade-in delay-400">
-          <div className="section-header">
+        {/* 最新信号 */}
+        <div className="dashboard-card recent-signals">
+          <div className="card-header">
             <Zap size={18} />
             <span>最新信号</span>
           </div>

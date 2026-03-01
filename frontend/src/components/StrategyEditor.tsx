@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Editor from '@monaco-editor/react';
 import { Play, Save, FileCode, Settings, ChevronDown, ChevronRight } from 'lucide-react';
+import { backtestAPI } from '../api';
 import './StrategyEditor.css';
 
 // 默认策略模板
@@ -66,13 +67,11 @@ const STRATEGY_TEMPLATES = [
 interface StrategyEditorProps {
   initialCode?: string;
   onSave?: (code: string, params: Record<string, any>) => void;
-  onRun?: (code: string, params: Record<string, any>) => void;
 }
 
 const StrategyEditor: React.FC<StrategyEditorProps> = ({
   initialCode = DEFAULT_STRATEGY,
   onSave,
-  onRun
 }) => {
   const [code, setCode] = useState(initialCode);
   const [strategyName, setStrategyName] = useState('双均线策略');
@@ -102,8 +101,30 @@ const StrategyEditor: React.FC<StrategyEditorProps> = ({
     addConsoleLog('开始回测...');
     
     try {
-      await onRun?.(code, params);
-      addConsoleLog('回测完成！');
+      const result = await backtestAPI.runBacktest({
+        strategy_code: code,
+        strategy_params: {
+          fast: params.fast,
+          slow: params.slow,
+        },
+        symbol: '600000.SH', // 默认测试浦发银行
+        start_date: '2024-01-01',
+        end_date: '2024-12-31',
+        initial_capital: params.initial_capital,
+        commission: params.commission,
+      });
+      
+      if (result.success) {
+        addConsoleLog(`回测完成！`);
+        addConsoleLog(`最终资金: ¥${result.final_value.toLocaleString()}`);
+        addConsoleLog(`总收益率: ${result.total_return}%`);
+        addConsoleLog(`年化收益: ${result.annual_return}%`);
+        addConsoleLog(`最大回撤: ${result.max_drawdown}%`);
+        addConsoleLog(`夏普比率: ${result.sharpe_ratio}`);
+        addConsoleLog(`交易次数: ${result.total_trades} (胜: ${result.winning_trades} / 负: ${result.losing_trades})`);
+      } else {
+        addConsoleLog(`回测失败: ${result.error}`);
+      }
     } catch (error) {
       addConsoleLog(`错误: ${error}`);
     } finally {

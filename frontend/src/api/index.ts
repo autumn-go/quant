@@ -47,8 +47,26 @@ export const strategyAPI = {
   getRecentSignals: () => fetchAPI('/signals/recent'),
 };
 
+// 回测 API
+export const backtestAPI = {
+  // 执行回测
+  runBacktest: (data: {
+    strategy_code: string;
+    strategy_params: Record<string, any>;
+    symbol?: string;
+    start_date?: string;
+    end_date?: string;
+    initial_capital?: number;
+    commission?: number;
+  }) => fetchAPI('/backtest/run', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+};
+
 export default {
   stock: stockAPI,
   market: marketAPI,
   strategy: strategyAPI,
+  backtest: backtestAPI,
 };
