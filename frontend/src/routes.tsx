@@ -12,6 +12,7 @@ import StockAnalysis from './pages/StockAnalysis';
 import StrategyLib from './pages/StrategyLib';
 import Backtest from './pages/Backtest';
 import Settings from './pages/Settings';
+import MarkdownDoc from './pages/MarkdownDoc';
 
 // 受保护的路由组件
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -61,6 +62,7 @@ const AppRoutes: React.FC = () => {
         <Route path="index" element={<IndexMaster />} />
         <Route path="style" element={<StyleMaster />} />
         <Route path="sector" element={<SectorRotation />} />
+        <Route path="doc/:filename" element={<MarkdownDoc />} />
         <Route path="stock" element={<StockAnalysis />} />
         <Route path="strategy" element={<StrategyLib />} />
         <Route path="backtest" element={<Backtest />} />

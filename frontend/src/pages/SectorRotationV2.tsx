@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Activity, 
   Target, 
@@ -188,15 +189,13 @@ const SectorRotationV2: React.FC = () => {
             <p>K-Means聚类 + 微观阻力打分系统</p>
           </div>
         </div>
-        <a 
-          href="/sector_rotation_algorithm.md" 
-          target="_blank" 
-          rel="noopener noreferrer"
+        <Link 
+          to="/doc/sector_rotation_algorithm" 
           className="algorithm-link"
         >
           <BookOpen size={18} />
           <span>算法说明</span>
-        </a>
+        </Link>
       </div>
 
       {/* 统计卡片 */}
