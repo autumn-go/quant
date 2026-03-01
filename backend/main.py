@@ -370,6 +370,112 @@ async def health_check():
     return {"status": "ok", "timestamp": datetime.utcnow()}
 
 
+# ==================== ETF数据接口 ====================
+
+@app.get("/api/etf/oversold")
+async def get_oversold_etfs(
+    rsi_threshold: float = 20.0,
+    rsi_period: str = "rsi_6",
+    limit: int = 50
+):
+    """获取超跌ETF列表（RSI < 20）"""
+    import sqlite3
+    
+    DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data-collector", "etf_data.db")
+    
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        
+        # 验证rsi_period参数
+        valid_periods = ["rsi_6", "rsi_12", "rsi_24"]
+        if rsi_period not in valid_periods:
+            rsi_period = "rsi_6"
+        
+        # 查询超跌ETF
+        query = f"""
+        SELECT 
+            d.ts_code,
+            l.name,
+            d.close,
+            d.pct_chg,
+            d.rsi_6,
+            d.rsi_12,
+            d.rsi_24,
+            d.trade_date
+        FROM etf_daily d
+        JOIN etf_list l ON d.ts_code = l.ts_code
+        WHERE d.{rsi_period} < ?
+          AND d.trade_date = (
+              SELECT MAX(trade_date) FROM etf_daily
+          )
+        ORDER BY d.{rsi_period} ASC
+        LIMIT ?
+        """
+        
+        cursor = conn.execute(query, (rsi_threshold, limit))
+        rows = cursor.fetchall()
+        conn.close()
+        
+        # 转换为响应
+        data = []
+        for row in rows:
+            data.append({
+                "ts_code": row["ts_code"],
+                "name": row["name"] or row["ts_code"],
+                "close": round(row["close"], 3),
+                "pct_chg": round(row["pct_chg"], 2) if row["pct_chg"] else 0.0,
+                "rsi_6": round(row["rsi_6"], 2) if row["rsi_6"] else None,
+                "rsi_12": round(row["rsi_12"], 2) if row["rsi_12"] else None,
+                "rsi_24": round(row["rsi_24"], 2) if row["rsi_24"] else None,
+                "trade_date": row["trade_date"]
+            })
+        
+        return {"total": len(data), "data": data, "threshold": rsi_threshold}
+        
+    except Exception as e:
+        logger.error(f"查询ETF数据失败: {e}")
+        return {"total": 0, "data": [], "threshold": rsi_threshold, "error": str(e)}
+
+
+@app.get("/api/etf/stats")
+async def get_etf_stats():
+    """获取ETF统计信息"""
+    import sqlite3
+    
+    DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data-collector", "etf_data.db")
+    
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        
+        stats = {}
+        cursor = conn.execute("SELECT COUNT(*) FROM etf_list")
+        stats["total_etfs"] = cursor.fetchone()[0]
+        
+        cursor = conn.execute("SELECT COUNT(DISTINCT ts_code) FROM etf_daily")
+        stats["etfs_with_data"] = cursor.fetchone()[0]
+        
+        cursor = conn.execute("SELECT COUNT(*) FROM etf_daily")
+        stats["total_records"] = cursor.fetchone()[0]
+        
+        cursor = conn.execute("SELECT MAX(trade_date) FROM etf_daily")
+        stats["latest_date"] = cursor.fetchone()[0]
+        
+        cursor = conn.execute("""
+            SELECT COUNT(*) FROM etf_daily
+            WHERE rsi_6 < 20
+              AND trade_date = (SELECT MAX(trade_date) FROM etf_daily)
+        """)
+        stats["oversold_count"] = cursor.fetchone()[0]
+        
+        conn.close()
+        return stats
+        
+    except Exception as e:
+        logger.error(f"查询ETF统计失败: {e}")
+        return {"error": str(e)}
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
