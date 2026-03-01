@@ -36,13 +36,15 @@ import pandas as pd
 import numpy as np
 import tushare as ts
 
-# 设置token
+# 设置token和代理URL
 token = os.getenv('TUSHARE_TOKEN')
 if not token:
     print('Error: TUSHARE_TOKEN not set')
     sys.exit(1)
 
 pro = ts.pro_api(token)
+pro._DataApi__token = token
+pro._DataApi__http_url = 'http://lianghua.nanyangqiankun.top'
 
 # 连接数据库
 conn = sqlite3.connect('etf_data.db')
