@@ -2,9 +2,8 @@ name: Daily ETF Data Update
 
 on:
   schedule:
-    # 每天北京时间 18:00 运行（收盘后）
     - cron: '0 10 * * 1-5'
-  workflow_dispatch:  # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   update-etf-data:
@@ -28,7 +27,7 @@ jobs:
         TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
       run: |
         cd data-collector
-        python3 -c "
+        python3 << 'EOF'
 import os
 import sys
 import sqlite3
@@ -36,7 +35,7 @@ import pandas as pd
 import numpy as np
 import tushare as ts
 
-# 设置token和代理URL
+# Setup token and proxy
 token = os.getenv('TUSHARE_TOKEN')
 if not token:
     print('Error: TUSHARE_TOKEN not set')
@@ -46,34 +45,34 @@ pro = ts.pro_api(token)
 pro._DataApi__token = token
 pro._DataApi__http_url = 'http://lianghua.nanyangqiankun.top'
 
-# 连接数据库
+# Connect database
 conn = sqlite3.connect('etf_data.db')
 
-# 获取最新日期
+# Get latest date
 cursor = conn.execute('SELECT MAX(trade_date) FROM etf_daily')
 latest_date = cursor.fetchone()[0]
-print(f'数据库最新日期: {latest_date}')
+print(f'DB latest date: {latest_date}')
 
-# 获取交易日历
+# Get trade calendar
 df_cal = pro.trade_cal(exchange='SSE', start_date=latest_date, end_date='20261231')
 trade_dates = df_cal[df_cal['is_open'] == 1]['cal_date'].tolist()
 
 if len(trade_dates) <= 1:
-    print('没有新的交易日需要更新')
+    print('No new trade dates')
     conn.close()
     sys.exit(0)
 
-# 获取最近30个交易日
+# Get last 30 trade days
 start_date = trade_dates[-30] if len(trade_dates) >= 30 else trade_dates[0]
 end_date = trade_dates[-1]
-print(f'更新区间: {start_date} 至 {end_date}')
+print(f'Update range: {start_date} to {end_date}')
 
-# 获取ETF列表
+# Get ETF list
 cursor = conn.execute('SELECT ts_code FROM etf_list')
 etf_codes = [row[0] for row in cursor.fetchall()]
-print(f'共 {len(etf_codes)} 只ETF')
+print(f'Total ETFs: {len(etf_codes)}')
 
-# 获取行情数据
+# Fetch data
 all_data = []
 for i, ts_code in enumerate(etf_codes):
     try:
@@ -81,16 +80,16 @@ for i, ts_code in enumerate(etf_codes):
         if df is not None and len(df) > 0:
             all_data.append(df)
         if (i + 1) % 100 == 0:
-            print(f'已获取 {i+1}/{len(etf_codes)}')
+            print(f'Fetched {i+1}/{len(etf_codes)}')
     except Exception as e:
-        print(f'{ts_code} 获取失败: {e}')
+        print(f'{ts_code} error: {e}')
 
 if all_data:
     df_all = pd.concat(all_data, ignore_index=True)
     df_all = df_all[['ts_code', 'trade_date', 'open', 'high', 'low', 'close', 
                      'pre_close', 'change', 'pct_chg', 'vol', 'amount']]
     
-    # 计算RSI
+    # Calculate RSI
     def calculate_rsi(prices, period=14):
         if len(prices) < period + 1:
             return [None] * len(prices)
@@ -111,7 +110,7 @@ if all_data:
                 rsi.append(100 - (100 / (1 + avg_gain/avg_loss)) if avg_loss != 0 else 100)
         return rsi
     
-    # 按ETF计算RSI
+    # Calc RSI for each ETF
     for ts_code in df_all['ts_code'].unique():
         mask = df_all['ts_code'] == ts_code
         closes = df_all.loc[mask, 'close'].values.astype(float)
@@ -119,7 +118,7 @@ if all_data:
         df_all.loc[mask, 'rsi_12'] = calculate_rsi(closes, 12)
         df_all.loc[mask, 'rsi_24'] = calculate_rsi(closes, 24)
     
-    # 更新数据库
+    # Update database
     for _, row in df_all.iterrows():
         conn.execute('''
             INSERT OR REPLACE INTO etf_daily 
@@ -130,16 +129,16 @@ if all_data:
               row['vol'], row['amount'], row.get('rsi_6'), row.get('rsi_12'), row.get('rsi_24')))
     
     conn.commit()
-    print(f'已更新 {len(df_all)} 条数据')
+    print(f'Updated {len(df_all)} records')
 
 conn.close()
-print('数据更新完成')
-"
+print('Done')
+EOF
         
     - name: Update JSON file
       run: |
         cd data-collector
-        python3 -c "
+        python3 << 'EOF'
 import sqlite3
 import json
 
@@ -175,8 +174,8 @@ output = {'total': len(data), 'data': data, 'threshold': 20}
 with open('../frontend/public/etf_oversold.json', 'w', encoding='utf-8') as f:
     json.dump(output, f, ensure_ascii=False, indent=2)
 
-print(f'已导出 {len(data)} 条ETF数据')
-"
+print(f'Exported {len(data)} ETFs')
+EOF
         
     - name: Commit and push changes
       run: |
