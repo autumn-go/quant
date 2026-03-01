@@ -43,9 +43,9 @@
   width: 40px;
   height: 40px;
   padding: 8px;
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary), var(--info));
   border-radius: 10px;
-  color: #ffffff;
+  color: var(--bg-primary);
   flex-shrink: 0;
 }
 
@@ -57,7 +57,9 @@
 .logo-title {
   font-size: 18px;
   font-weight: 700;
-  color: var(--text-primary);
+  background: linear-gradient(135deg, var(--primary), var(--info));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .logo-subtitle {
@@ -138,6 +140,7 @@
   height: 20px;
   background: var(--primary);
   border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 10px var(--primary);
 }
 
 .nav-content {
@@ -249,13 +252,13 @@
 .user-avatar {
   width: 36px;
   height: 36px;
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary), var(--info));
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--bg-primary);
 }
 
 /* 页面内容 */
