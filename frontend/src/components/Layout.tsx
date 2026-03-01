@@ -13,15 +13,18 @@ import {
   Menu,
   X,
   Zap,
-  ChevronRight
+  ChevronRight,
+  LogOut,
+  Shield
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import './Layout.css';
 
 const menuItems = [
   { path: '/', icon: LayoutDashboard, label: '总览', desc: 'Dashboard' },
   { path: '/index', icon: TrendingUp, label: '指数大师', desc: '指数择时' },
   { path: '/style', icon: PieChart, label: '宽基大师', desc: '风格择时' },
-  { path: '/sector', icon: RotateCcw, label: '板块轮动', desc: '日频轮动' },
+  { path: '/sector', icon: RotateCcw, label: '板块轮动 Pro', desc: 'K-Means聚类+阻力打分' },
   { path: '/stock', icon: BarChart3, label: '个股分析', desc: '趋势/形态/做T' },
   { path: '/strategy', icon: BookOpen, label: '策略库', desc: '策略管理' },
   { path: '/backtest', icon: TestTube, label: '回测中心', desc: '策略验证' },
@@ -32,6 +35,7 @@ const Layout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   return (
     <div className="layout">
@@ -132,7 +136,12 @@ const Layout: React.FC = () => {
               <span className="market-badge">A股交易中</span>
             </div>
             <div className="user-info">
-              <div className="user-avatar">Q</div>
+              <div className="user-avatar" title={user?.username}>
+                {user?.isAdmin ? <Shield size={16} /> : user?.username.charAt(0).toUpperCase()}
+              </div>
+              <button className="logout-btn" onClick={logout} title="退出登录">
+                <LogOut size={18} />
+              </button>
             </div>
           </div>
         </header>

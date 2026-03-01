@@ -1,7 +1,10 @@
+/* 苹果风 - 策略库样式 */
 .strategy-lib {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 28px;
+  max-width: 1600px;
+  margin: 0 auto;
 }
 
 .editor-header {
@@ -11,13 +14,24 @@
 }
 
 .editor-header h3 {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
 }
 
 .editor-container {
   flex: 1;
   min-height: 600px;
+  background: var(--bg-card);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.02),
+    0 4px 24px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
 }
 
 .strategy-actions {
@@ -26,73 +40,94 @@
 }
 
 .strategy-list {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
   padding: 24px;
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.02),
+    0 4px 24px rgba(0, 0, 0, 0.04);
 }
 
 .list-header {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr 120px;
   gap: 16px;
-  padding: 12px 16px;
-  background: var(--bg-tertiary);
-  border-radius: 8px;
-  font-size: 13px;
+  padding: 14px 20px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .list-item {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr 120px;
   gap: 16px;
-  padding: 16px;
-  border-bottom: 1px solid var(--border-color);
+  padding: 18px 20px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
   align-items: center;
   font-size: 14px;
+  margin-bottom: 8px;
+  transition: all var(--transition-fast);
 }
 
 .list-item:last-child {
-  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.list-item:hover {
+  background: #EBEBF0;
+  transform: translateX(4px);
 }
 
 .strategy-name {
   font-weight: 600;
+  color: var(--text-primary);
+  font-size: 15px;
 }
 
 .strategy-type {
-  color: var(--text-muted);
+  color: var(--text-secondary);
   text-transform: capitalize;
+  font-weight: 500;
 }
 
 .status-badge {
-  padding: 4px 12px;
-  border-radius: 20px;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 700;
   width: fit-content;
+  letter-spacing: 0.02em;
 }
 
 .status-badge.active {
-  background: rgba(0, 255, 136, 0.1);
-  color: var(--success);
+  background: rgba(52, 199, 89, 0.12);
+  color: #248A3D;
 }
 
 .status-badge.inactive {
-  background: rgba(255, 71, 87, 0.1);
-  color: var(--danger);
+  background: rgba(255, 59, 48, 0.12);
+  color: #C41C14;
 }
 
 .strategy-return {
   font-family: var(--font-mono);
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 15px;
 }
 
 .strategy-return.up {
-  color: var(--success);
+  color: var(--danger);
 }
 
 .strategy-return.down {
-  color: var(--danger);
+  color: var(--success);
 }
 
 .strategy-actions-row {
@@ -101,25 +136,26 @@
 }
 
 .action-btn {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.04);
+  border: none;
+  border-radius: var(--radius-md);
   color: var(--text-secondary);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .action-btn:hover {
-  border-color: var(--primary);
+  background: rgba(0, 122, 255, 0.1);
   color: var(--primary);
+  transform: scale(1.05);
 }
 
 .action-btn.delete:hover {
-  border-color: var(--danger);
+  background: rgba(255, 59, 48, 0.1);
   color: var(--danger);
 }

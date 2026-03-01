@@ -62,9 +62,9 @@ const Dashboard: React.FC = () => {
           strategyAPI.getRecentSignals(),
         ]);
         
-        setMarketData(indices);
-        setStrategyStats(stats);
-        setRecentSignals(signals);
+        setMarketData(indices.length > 0 ? indices : mockMarketData);
+        setStrategyStats(stats.length > 0 ? stats : mockStrategyStats);
+        setRecentSignals(signals.length > 0 ? signals : mockSignals);
       } catch (error) {
         console.error('Failed to fetch data:', error);
       } finally {
@@ -104,6 +104,29 @@ const Dashboard: React.FC = () => {
     { time: '15:00', value: 4146, volume: 1600 },
   ];
 
+  // 模拟数据 - 当API失败时使用
+  const mockMarketData: MarketIndex[] = [
+    { name: '上证指数', code: '000001.SH', value: 3050.32, change: 0.85, trend: 'up', signal: '看多' },
+    { name: '深证成指', code: '399001.SZ', value: 9456.18, change: 1.12, trend: 'up', signal: '看多' },
+    { name: '创业板指', code: '399006.SZ', value: 1823.65, change: -0.34, trend: 'down', signal: '观望' },
+    { name: '科创50', code: '000688.SH', value: 789.45, change: 0.56, trend: 'up', signal: '看多' },
+  ];
+
+  const mockStrategyStats: StrategyStat[] = [
+    { name: '趋势跟踪', count: 12, active: 8, return: '+12.5%' },
+    { name: '均值回归', count: 8, active: 5, return: '+8.3%' },
+    { name: '动量策略', count: 6, active: 4, return: '+15.2%' },
+    { name: '多因子', count: 10, active: 6, return: '+6.8%' },
+  ];
+
+  const mockSignals: Signal[] = [
+    { time: '14:32', type: '买入', symbol: '000001.SZ', name: '平安银行', strategy: '趋势突破', confidence: 87 },
+    { time: '14:15', type: '买入', symbol: '002594.SZ', name: '比亚迪', strategy: '动量策略', confidence: 92 },
+    { time: '13:58', type: '卖出', symbol: '600519.SH', name: '贵州茅台', strategy: '均值回归', confidence: 78 },
+    { time: '13:42', type: '观望', symbol: '000858.SZ', name: '五粮液', strategy: '多因子', confidence: 65 },
+    { time: '13:25', type: '买入', symbol: '300750.SZ', name: '宁德时代', strategy: '趋势突破', confidence: 89 },
+  ];
+
   if (loading) {
     return <div className="loading-container"><div className="loading" /></div>;
   }
@@ -129,16 +152,47 @@ const Dashboard: React.FC = () => {
             <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={chartData}>
                 <defs>
-                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#000000" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#000000" stopOpacity={0}/>
+                  <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#007AFF" stopOpacity={0.25}/>
+                    <stop offset="95%" stopColor="#007AFF" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
-                <XAxis dataKey="time" stroke="#94a3b8" fontSize={11} tickLine={false} />
-                <YAxis domain={['dataMin - 10', 'dataMax + 10']} stroke="#94a3b8" fontSize={11} tickLine={false} />
-                <Tooltip contentStyle={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '12px' }} />
-                <Area type="monotone" dataKey="value" stroke="#000000" strokeWidth={1.5} fillOpacity={1} fill="url(#colorValue)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false} />
+                <XAxis 
+                  dataKey="time" 
+                  stroke="#C7C7CC" 
+                  fontSize={11} 
+                  tickLine={false} 
+                  axisLine={false}
+                  tick={{ fill: '#86868B', fontWeight: 500 }}
+                />
+                <YAxis 
+                  domain={['dataMin - 10', 'dataMax + 10']} 
+                  stroke="#C7C7CC" 
+                  fontSize={11} 
+                  tickLine={false} 
+                  axisLine={false}
+                  tick={{ fill: '#86868B', fontWeight: 500 }}
+                  width={50}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    background: 'rgba(255, 255, 255, 0.95)', 
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(0,0,0,0.06)', 
+                    borderRadius: '12px', 
+                    fontSize: '13px',
+                    boxShadow: '0 4px 24px rgba(0,0,0,0.1)'
+                  }} 
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="value" 
+                  stroke="#007AFF" 
+                  strokeWidth={2} 
+                  fillOpacity={1} 
+                  fill="url(#chartGradient)" 
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>

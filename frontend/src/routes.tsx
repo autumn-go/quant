@@ -1,12 +1,13 @@
 // 路由配置
-import React, { useEffect, useState } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import IndexMaster from './pages/IndexMaster';
 import StyleMaster from './pages/StyleMaster';
-import SectorRotation from './pages/SectorRotation';
+import SectorRotation from './pages/SectorRotationV2';
 import StockAnalysis from './pages/StockAnalysis';
 import StrategyLib from './pages/StrategyLib';
 import Backtest from './pages/Backtest';
@@ -14,33 +15,48 @@ import Settings from './pages/Settings';
 
 // 受保护的路由组件
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const token = localStorage.getItem('quant_token');
-    setIsAuthenticated(!!token);
-  }, [navigate]);
-
-  if (isAuthenticated === null) {
-    return <div className="loading-screen">加载中...</div>;
+  const { isAuthenticated } = useAuth();
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
   }
+  
+  return <>{children}</>;
+};
 
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+// 公开路由（已登录用户不能访问）
+const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return <>{children}</>;
 };
 
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      {/* 登录页面 - 公开访问 */}
-      <Route path="/login" element={<Login />} />
+      {/* 登录页 */}
+      <Route 
+        path="/login" 
+        element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        } 
+      />
       
       {/* 受保护的路由 */}
-      <Route path="/" element={
-        <ProtectedRoute>
-          <Layout />
-        </ProtectedRoute>
-      }>
+      <Route 
+        path="/" 
+        element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<Dashboard />} />
         <Route path="index" element={<IndexMaster />} />
         <Route path="style" element={<StyleMaster />} />
@@ -51,7 +67,7 @@ const AppRoutes: React.FC = () => {
         <Route path="settings" element={<Settings />} />
       </Route>
       
-      {/* 默认重定向 */}
+      {/* 兜底路由 */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

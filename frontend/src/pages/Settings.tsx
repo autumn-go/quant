@@ -1,238 +1,121 @@
+// 设置页面 - 包含多个子模块
 import React, { useState } from 'react';
-import { Database, Bell, Shield, User, Lock, Mail, Key, Save, LogOut } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { 
+  Database, 
+  Bell, 
+  Shield, 
+  User,
+  ChevronRight,
+  LogOut
+} from 'lucide-react';
+import AccountSettings from './settings/AccountSettings';
 import './Settings.css';
 
+type SettingsTab = 'account' | 'datasource' | 'notification' | 'security';
+
 const SettingsPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('account');
-  const [passwordForm, setPasswordForm] = useState({
-    current: '',
-    new: '',
-    confirm: ''
-  });
-  const [saved, setSaved] = useState(false);
+  const [activeTab, setActiveTab] = useState<SettingsTab>('account');
+  const { user, logout } = useAuth();
 
-  const handlePasswordChange = (e: React.FormEvent) => {
-    e.preventDefault();
-    // 模拟保存
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-    setPasswordForm({ current: '', new: '', confirm: '' });
-  };
+  const settingsMenu = [
+    { id: 'account' as SettingsTab, icon: User, label: '账户管理', desc: '用户和权限' },
+    { id: 'datasource' as SettingsTab, icon: Database, label: '数据源配置', desc: 'AKShare API设置' },
+    { id: 'notification' as SettingsTab, icon: Bell, label: '通知设置', desc: '信号提醒和推送' },
+    { id: 'security' as SettingsTab, icon: Shield, label: '安全设置', desc: '登录和权限管理' },
+  ];
 
-  const handleLogout = () => {
-    localStorage.removeItem('quant_token');
-    localStorage.removeItem('quant_user');
-    window.location.href = '/login';
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'account':
+        return <AccountSettings />;
+      case 'datasource':
+        return (
+          <div className="settings-placeholder">
+            <Database size={48} className="placeholder-icon" />
+            <h3>数据源配置</h3>
+            <p>AKShare API 设置功能开发中...</p>
+          </div>
+        );
+      case 'notification':
+        return (
+          <div className="settings-placeholder">
+            <Bell size={48} className="placeholder-icon" />
+            <h3>通知设置</h3>
+            <p>信号提醒和推送功能开发中...</p>
+          </div>
+        );
+      case 'security':
+        return (
+          <div className="settings-placeholder">
+            <Shield size={48} className="placeholder-icon" />
+            <h3>安全设置</h3>
+            <p>登录和权限管理功能开发中...</p>
+          </div>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
     <div className="settings">
+      {/* 页面标题 */}
       <div className="page-header">
         <h2>设置</h2>
-        <p>系统配置 · 个人偏好 · 账号管理</p>
+        <p>系统配置 · 个人偏好</p>
       </div>
 
       <div className="settings-layout">
         {/* 左侧菜单 */}
         <div className="settings-sidebar">
-          <button 
-            className={`settings-menu-item ${activeTab === 'account' ? 'active' : ''}`}
-            onClick={() => setActiveTab('account')}
-          >
-            <User size={20} />
-            <span>账户设置</span>
-          </button>
-          
-          <button 
-            className={`settings-menu-item ${activeTab === 'password' ? 'active' : ''}`}
-            onClick={() => setActiveTab('password')}
-          >
-            <Lock size={20} />
-            <span>修改密码</span>
-          </button>
-          
-          <button 
-            className={`settings-menu-item ${activeTab === 'data' ? 'active' : ''}`}
-            onClick={() => setActiveTab('data')}
-          >
-            <Database size={20} />
-            <span>数据源配置</span>
-          </button>
-          
-          <button 
-            className={`settings-menu-item ${activeTab === 'notifications' ? 'active' : ''}`}
-            onClick={() => setActiveTab('notifications')}
-          >
-            <Bell size={20} />
-            <span>通知设置</span>
-          </button>
-          
-          <button 
-            className={`settings-menu-item ${activeTab === 'security' ? 'active' : ''}`}
-            onClick={() => setActiveTab('security')}
-          >
-            <Shield size={20} />
-            <span>安全设置</span>
-          </button>
+          <div className="settings-menu">
+            {settingsMenu.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              
+              return (
+                <button
+                  key={item.id}
+                  className={`settings-menu-item ${isActive ? 'active' : ''}`}
+                  onClick={() => setActiveTab(item.id)}
+                >
+                  <div className="menu-item-icon">
+                    <Icon size={20} />
+                  </div>
+                  <div className="menu-item-content">
+                    <span className="menu-item-label">{item.label}</span>
+                    <span className="menu-item-desc">{item.desc}</span>
+                  </div>
+                  <ChevronRight 
+                    size={16} 
+                    className={`menu-item-arrow ${isActive ? 'active' : ''}`}
+                  />
+                </button>
+              );
+            })}
+          </div>
 
-          <div className="settings-divider" />
-
-          <button className="settings-menu-item logout" onClick={handleLogout}>
-            <LogOut size={20} />
-            <span>退出登录</span>
-          </button>
+          {/* 用户信息卡片 */}
+          <div className="user-card">
+            <div className="user-card-avatar">
+              {user?.username.charAt(0).toUpperCase()}
+            </div>
+            <div className="user-card-info">
+              <span className="user-card-name">{user?.username}</span>
+              <span className="user-card-role">
+                {user?.isAdmin ? '管理员' : '普通用户'}
+              </span>
+            </div>
+            <button className="btn-logout" onClick={logout} title="退出登录">
+              <LogOut size={18} />
+            </button>
+          </div>
         </div>
 
-        {/* 右侧内容 */}
-        <div className="settings-content glass-card">
-          {/* 账户设置 */}
-          {activeTab === 'account' && (
-            <div className="settings-section">
-              <h3><User size={24} /> 账户信息</h3>
-              
-              <div className="form-group">
-                <label>用户名</label>
-                <input type="text" defaultValue="admin" />
-              </div>
-              
-              <div className="form-group">
-                <label>邮箱</label>
-                <div className="input-with-icon">
-                  <Mail size={18} />
-                  <input type="email" placeholder="请输入邮箱" />
-                </div>
-              </div>
-              
-              <div className="form-group">
-                <label>手机号</label>
-                <input type="tel" placeholder="请输入手机号" />
-              </div>
-              
-              <button className="btn-save">
-                <Save size={18} /> 保存修改
-              </button>
-            </div>
-          )}
-
-          {/* 修改密码 */}
-          {activeTab === 'password' && (
-            <div className="settings-section">
-              <h3><Key size={24} /> 修改密码</h3>
-              
-              {saved && <div className="save-success">密码修改成功！</div>}
-              
-              <form onSubmit={handlePasswordChange}>
-                <div className="form-group">
-                  <label>当前密码</label>
-                  <input 
-                    type="password" 
-                    value={passwordForm.current}
-                    onChange={(e) => setPasswordForm({...passwordForm, current: e.target.value})}
-                    placeholder="请输入当前密码"
-                    required
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>新密码</label>
-                  <input 
-                    type="password"
-                    value={passwordForm.new}
-                    onChange={(e) => setPasswordForm({...passwordForm, new: e.target.value})}
-                    placeholder="请输入新密码（至少6位）"
-                    required
-                    minLength={6}
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>确认新密码</label>
-                  <input 
-                    type="password"
-                    value={passwordForm.confirm}
-                    onChange={(e) => setPasswordForm({...passwordForm, confirm: e.target.value})}
-                    placeholder="请再次输入新密码"
-                    required
-                  />
-                </div>
-                
-                <button type="submit" className="btn-save">
-                  <Lock size={18} /> 修改密码
-                </button>
-              </form>
-            </div>
-          )}
-
-          {/* 数据源配置 */}
-          {activeTab === 'data' && (
-            <div className="settings-section">
-              <h3><Database size={24} /> 数据源配置</h3>
-              
-              <div className="form-group">
-                <label>Tushare Token</label>
-                <input type="password" placeholder="请输入Tushare API Token" />
-              </div>
-              
-              <div className="form-group">
-                <label>数据更新频率</label>
-                <select>
-                  <option>实时</option>
-                  <option selected>每日收盘后</option>
-                  <option>手动更新</option>
-                </select>
-              </div>
-              
-              <button className="btn-save"><Save size={18} /> 保存配置</button>
-            </div>
-          )}
-
-          {/* 通知设置 */}
-          {activeTab === 'notifications' && (
-            <div className="settings-section">
-              <h3><Bell size={24} /> 通知设置</h3>
-              
-              <div className="toggle-list">
-                <label className="toggle-item">
-                  <span>交易信号提醒</span>
-                  <input type="checkbox" defaultChecked />
-                </label>
-                
-                <label className="toggle-item">
-                  <span>策略执行通知</span>
-                  <input type="checkbox" defaultChecked />
-                </label>
-                
-                <label className="toggle-item">
-                  <span>系统公告</span>
-                  <input type="checkbox" />
-                </label>
-              </div>
-            </div>
-          )}
-
-          {/* 安全设置 */}
-          {activeTab === 'security' && (
-            <div className="settings-section">
-              <h3><Shield size={24} /> 安全设置</h3>
-              
-              <div className="toggle-list">
-                <label className="toggle-item">
-                  <span>登录二次验证</span>
-                  <input type="checkbox" />
-                </label>
-                
-                <label className="toggle-item">
-                  <span>异地登录提醒</span>
-                  <input type="checkbox" defaultChecked />
-                </label>
-              </div>
-              
-              <div className="security-info">
-                <p>上次登录：2026-03-01 14:30:00</p>
-                <p>登录IP：192.168.1.100</p>
-              </div>
-            </div>
-          )}
+        {/* 右侧内容区 */}
+        <div className="settings-content">
+          {renderContent()}
         </div>
       </div>
     </div>

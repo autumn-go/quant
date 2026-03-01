@@ -1,33 +1,33 @@
+// 登录页面
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Lock, User, Eye, EyeOff, Zap } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { Zap, Eye, EyeOff, Lock, User } from 'lucide-react';
 import './Login.css';
 
 const Login: React.FC = () => {
-  const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
+    setIsLoading(true);
 
-    // 模拟登录验证
-    setTimeout(() => {
-      if (username && password) {
-        // 保存登录状态
-        localStorage.setItem('quant_token', 'mock_token_' + Date.now());
-        localStorage.setItem('quant_user', JSON.stringify({ username }));
-        navigate('/');
-      } else {
-        setError('请输入用户名和密码');
+    try {
+      const success = await login(username, password);
+      if (!success) {
+        setError('用户名或密码错误');
       }
-      setLoading(false);
-    }, 1000);
+    } catch (err) {
+      setError('登录失败，请重试');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -36,17 +36,21 @@ const Login: React.FC = () => {
         {/* Logo区域 */}
         <div className="login-header">
           <div className="login-logo">
-            <Zap size={48} className="logo-icon" />
+            <Zap size={40} className="logo-icon" />
           </div>
           <h1>QuantPro</h1>
-          <p>专业量化投研系统</p>
+          <p>投研系统</p>
         </div>
 
         {/* 登录表单 */}
-        <form className="login-form" onSubmit={handleSubmit}>
-          {error && <div className="login-error">{error}</div>}
-          
-          <div className="form-group">
+        <form onSubmit={handleSubmit} className="login-form">
+          {error && (
+            <div className="login-error">
+              {error}
+            </div>
+          )}
+
+          <div className="login-field">
             <label>
               <User size={18} />
               用户名
@@ -56,21 +60,23 @@ const Login: React.FC = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="请输入用户名"
+              required
               autoFocus
             />
           </div>
 
-          <div className="form-group">
+          <div className="login-field">
             <label>
               <Lock size={18} />
               密码
             </label>
-            <div className="password-input">
+            <div className="password-input-wrapper">
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="请输入密码"
+                required
               />
               <button
                 type="button"
@@ -82,32 +88,27 @@ const Login: React.FC = () => {
             </div>
           </div>
 
-          <div className="form-options">
-            <label className="remember-me">
-              <input type="checkbox" defaultChecked />
-              <span>记住我</span>
-            </label>
-            <a href="#" className="forgot-password">忘记密码？</a>
-          </div>
-
-          <button 
-            type="submit" 
-            className="login-btn"
-            disabled={loading}
+          <button
+            type="submit"
+            className="login-button"
+            disabled={isLoading || !username || !password}
           >
-            {loading ? '登录中...' : '登录'}
+            {isLoading ? (
+              <span className="loading-spinner" />
+            ) : (
+              '登录'
+            )}
           </button>
         </form>
 
-        {/* 底部信息 */}
+        {/* 底部提示 */}
         <div className="login-footer">
-          <p>还没有账号？<a href="#">联系管理员</a></p>
-          <p className="version">v1.0.0</p>
+          <p>默认账户: admin / admin123</p>
         </div>
       </div>
 
       {/* 背景装饰 */}
-      <div className="login-bg">
+      <div className="login-bg-decoration">
         <div className="bg-circle circle-1" />
         <div className="bg-circle circle-2" />
         <div className="bg-circle circle-3" />
