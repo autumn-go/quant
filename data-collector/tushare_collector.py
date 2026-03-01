@@ -4,7 +4,7 @@ import sqlite3
 from datetime import datetime, timedelta
 import time
 
-TOKEN = 'fb3c079912502be08b6fc877031219159d9fcac540ca83f77974ed7714d4'
+TOKEN = '75d5fb0d2da34ab076f1ab49eaecfac348aaf91faf06246bfcab9f68904c'
 DB_PATH = "quant_data.db"
 
 def init_db():
