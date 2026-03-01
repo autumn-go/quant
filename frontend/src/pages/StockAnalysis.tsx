@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Search, TrendingUp, Activity, Clock, BarChart2, ArrowDown, ArrowUp, TrendingDown } from 'lucide-react';
 import './StockAnalysis.css';
 
@@ -26,7 +26,7 @@ const mockOversoldData = [
 
 // 超跌透视组件
 const OversoldAnalysis: React.FC = () => {
-  const [data, setData] = useState(mockOversoldData);
+  const [data] = useState(mockOversoldData);
   const [sortBy, setSortBy] = useState<'rsi' | 'change' | 'days'>('rsi');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
