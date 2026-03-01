@@ -381,7 +381,22 @@ async def get_oversold_etfs(
     """获取超跌ETF列表（RSI < 20）"""
     import sqlite3
     
-    DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data-collector", "etf_data.db")
+    # 尝试多个可能的路径
+    possible_paths = [
+        os.path.join(os.path.dirname(__file__), "etf_data.db"),  # 同目录
+        os.path.join(os.path.dirname(__file__), "..", "data-collector", "etf_data.db"),  # 上级目录
+        "/root/.openclaw/workspace/quant-platform/backend/etf_data.db",
+        "/root/.openclaw/workspace/quant-platform/data-collector/etf_data.db",
+    ]
+    
+    DB_PATH = None
+    for path in possible_paths:
+        if os.path.exists(path):
+            DB_PATH = path
+            break
+    
+    if not DB_PATH:
+        return {"total": 0, "data": [], "threshold": rsi_threshold, "error": "Database not found"}
     
     try:
         conn = sqlite3.connect(DB_PATH)
@@ -443,7 +458,22 @@ async def get_etf_stats():
     """获取ETF统计信息"""
     import sqlite3
     
-    DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data-collector", "etf_data.db")
+    # 尝试多个可能的路径
+    possible_paths = [
+        os.path.join(os.path.dirname(__file__), "etf_data.db"),
+        os.path.join(os.path.dirname(__file__), "..", "data-collector", "etf_data.db"),
+        "/root/.openclaw/workspace/quant-platform/backend/etf_data.db",
+        "/root/.openclaw/workspace/quant-platform/data-collector/etf_data.db",
+    ]
+    
+    DB_PATH = None
+    for path in possible_paths:
+        if os.path.exists(path):
+            DB_PATH = path
+            break
+    
+    if not DB_PATH:
+        return {"error": "Database not found"}
     
     try:
         conn = sqlite3.connect(DB_PATH)
