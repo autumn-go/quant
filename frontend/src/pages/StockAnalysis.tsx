@@ -157,7 +157,7 @@ const OversoldAnalysis: React.FC = () => {
 const PlaceholderModule: React.FC<{ name: string; desc: string }> = ({ name, desc }) => (
   <div className="placeholder-module">
     <div className="placeholder-icon-large"><Activity size={64} /></div>
-    <h3>{name}</h3><p>{desc}><div className="coming-soon">功能开发中...</div>
+    <h3>{name}</h3><p>{desc}</p><div className="coming-soon">功能开发中...</div>
   </div>
 );
 

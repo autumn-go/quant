@@ -1,0 +1,184 @@
+name: Daily ETF Data Update
+
+on:
+  schedule:
+    # 每天北京时间 15:30 运行（收盘后）
+    - cron: '30 7 * * 1-5'
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  update-etf-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        
+    - name: Install dependencies
+      run: |
+        pip install tushare pandas numpy
+        
+    - name: Update ETF data
+      env:
+        TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
+      run: |
+        cd data-collector
+        python3 -c "
+import os
+import sys
+import sqlite3
+import pandas as pd
+import numpy as np
+import tushare as ts
+
+# 设置token
+token = os.getenv('TUSHARE_TOKEN')
+if not token:
+    print('Error: TUSHARE_TOKEN not set')
+    sys.exit(1)
+
+pro = ts.pro_api(token)
+
+# 连接数据库
+conn = sqlite3.connect('etf_data.db')
+
+# 获取最新日期
+cursor = conn.execute('SELECT MAX(trade_date) FROM etf_daily')
+latest_date = cursor.fetchone()[0]
+print(f'数据库最新日期: {latest_date}')
+
+# 获取交易日历
+df_cal = pro.trade_cal(exchange='SSE', start_date=latest_date, end_date='20261231')
+trade_dates = df_cal[df_cal['is_open'] == 1]['cal_date'].tolist()
+
+if len(trade_dates) <= 1:
+    print('没有新的交易日需要更新')
+    conn.close()
+    sys.exit(0)
+
+# 获取最近30个交易日
+start_date = trade_dates[-30] if len(trade_dates) >= 30 else trade_dates[0]
+end_date = trade_dates[-1]
+print(f'更新区间: {start_date} 至 {end_date}')
+
+# 获取ETF列表
+cursor = conn.execute('SELECT ts_code FROM etf_list')
+etf_codes = [row[0] for row in cursor.fetchall()]
+print(f'共 {len(etf_codes)} 只ETF')
+
+# 获取行情数据
+all_data = []
+for i, ts_code in enumerate(etf_codes):
+    try:
+        df = pro.fund_daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
+        if df is not None and len(df) > 0:
+            all_data.append(df)
+        if (i + 1) % 100 == 0:
+            print(f'已获取 {i+1}/{len(etf_codes)}')
+    except Exception as e:
+        print(f'{ts_code} 获取失败: {e}')
+
+if all_data:
+    df_all = pd.concat(all_data, ignore_index=True)
+    df_all = df_all[['ts_code', 'trade_date', 'open', 'high', 'low', 'close', 
+                     'pre_close', 'change', 'pct_chg', 'vol', 'amount']]
+    
+    # 计算RSI
+    def calculate_rsi(prices, period=14):
+        if len(prices) < period + 1:
+            return [None] * len(prices)
+        deltas = np.diff(prices)
+        gains = np.where(deltas > 0, deltas, 0)
+        losses = np.where(deltas < 0, -deltas, 0)
+        avg_gain = np.mean(gains[:period])
+        avg_loss = np.mean(losses[:period])
+        rsi = []
+        for i in range(len(prices)):
+            if i < period:
+                rsi.append(None)
+            elif i == period:
+                rsi.append(100 - (100 / (1 + avg_gain/avg_loss)) if avg_loss != 0 else 100)
+            else:
+                avg_gain = (avg_gain * (period - 1) + gains[i-1]) / period
+                avg_loss = (avg_loss * (period - 1) + losses[i-1]) / period
+                rsi.append(100 - (100 / (1 + avg_gain/avg_loss)) if avg_loss != 0 else 100)
+        return rsi
+    
+    # 按ETF计算RSI
+    for ts_code in df_all['ts_code'].unique():
+        mask = df_all['ts_code'] == ts_code
+        closes = df_all.loc[mask, 'close'].values.astype(float)
+        df_all.loc[mask, 'rsi_6'] = calculate_rsi(closes, 6)
+        df_all.loc[mask, 'rsi_12'] = calculate_rsi(closes, 12)
+        df_all.loc[mask, 'rsi_24'] = calculate_rsi(closes, 24)
+    
+    # 更新数据库
+    for _, row in df_all.iterrows():
+        conn.execute('''
+            INSERT OR REPLACE INTO etf_daily 
+            (ts_code, trade_date, open, high, low, close, pre_close, change, pct_chg, vol, amount, rsi_6, rsi_12, rsi_24)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (row['ts_code'], row['trade_date'], row['open'], row['high'], row['low'],
+              row['close'], row['pre_close'], row['change'], row['pct_chg'], 
+              row['vol'], row['amount'], row.get('rsi_6'), row.get('rsi_12'), row.get('rsi_24')))
+    
+    conn.commit()
+    print(f'已更新 {len(df_all)} 条数据')
+
+conn.close()
+print('数据更新完成')
+"
+        
+    - name: Update JSON file
+      run: |
+        cd data-collector
+        python3 -c "
+import sqlite3
+import json
+
+conn = sqlite3.connect('etf_data.db')
+conn.row_factory = sqlite3.Row
+
+cursor = conn.execute('''
+    SELECT d.ts_code, l.name, d.close, d.pct_chg, d.rsi_6, d.rsi_12, d.rsi_24, d.trade_date
+    FROM etf_daily d
+    JOIN etf_list l ON d.ts_code = l.ts_code
+    WHERE d.rsi_6 < 20
+      AND d.trade_date = (SELECT MAX(trade_date) FROM etf_daily)
+    ORDER BY d.rsi_6 ASC
+''')
+
+rows = cursor.fetchall()
+data = []
+for row in rows:
+    data.append({
+        'ts_code': row['ts_code'],
+        'name': row['name'] or row['ts_code'],
+        'close': round(row['close'], 3),
+        'pct_chg': round(row['pct_chg'], 2) if row['pct_chg'] else 0.0,
+        'rsi_6': round(row['rsi_6'], 2) if row['rsi_6'] else None,
+        'rsi_12': round(row['rsi_12'], 2) if row['rsi_12'] else None,
+        'rsi_24': round(row['rsi_24'], 2) if row['rsi_24'] else None,
+        'trade_date': row['trade_date']
+    })
+
+conn.close()
+
+output = {'total': len(data), 'data': data, 'threshold': 20}
+with open('../frontend/public/etf_oversold.json', 'w', encoding='utf-8') as f:
+    json.dump(output, f, ensure_ascii=False, indent=2)
+
+print(f'已导出 {len(data)} 条ETF数据')
+"
+        
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add data-collector/etf_data.db frontend/public/etf_oversold.json
+        git diff --staged --quiet || (git commit -m "auto: update ETF data $(date +%Y-%m-%d)" && git push)
