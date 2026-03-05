@@ -1,0 +1,7 @@
+2026-03-01 13:44:19.125 | INFO     | __main__:init_db:87 - Database initialized
+2026-03-01 13:44:19.125 | INFO     | __main__:__init__:46 - TushareDataCollector initialized, DB: quant_data.db
+2026-03-01 13:44:19.125 | INFO     | __main__:main:415 - Starting 全量 data collection...
+2026-03-01 13:44:19.126 | INFO     | __main__:main:426 - Will collect 10 indices
+2026-03-01 13:44:19.130 | INFO     | __main__:main:433 - Will collect 5485 stocks
+2026-03-01 13:44:19.130 | INFO     | __main__:collect_all:323 - Starting to collect 5495 symbols...
+2026-03-01 13:44:21.827 | INFO     | __main__:collect_all:336 - [10/5495] 399005.SZ: empty, 已用 0.0 分, 速度 222.5 个/分

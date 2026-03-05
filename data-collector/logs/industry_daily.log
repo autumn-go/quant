@@ -1,0 +1,84 @@
+2026-03-03 16:48:02.819 | INFO     | __main__:__init__:41 - IndustryDataCollector initialized, DB: quant_data_2026.db
+2026-03-03 16:48:02.886 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260302: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.887 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260227: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.887 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260226: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.887 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260225: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.887 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260224: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.887 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260213: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.887 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260212: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.888 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260211: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.888 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260210: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.888 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260209: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.888 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260206: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.888 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260205: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.889 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260204: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.889 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260203: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.889 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260202: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.889 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260130: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.889 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260129: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.889 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260128: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.890 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260127: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.890 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260126: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.890 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260123: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.890 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260122: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.890 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260121: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.891 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260120: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.891 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260119: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.891 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260116: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.891 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260115: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.891 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260114: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.891 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260113: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.892 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260112: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.892 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260109: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.892 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260108: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.892 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260107: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.892 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260106: table industry_daily has no column named pre_close
+2026-03-03 16:48:02.892 | ERROR    | __main__:save_daily_data:103 - Failed to save 881101.TI 20260105: table industry_daily has no column named pre_close
+2026-03-03 16:48:03.095 | INFO     | __main__:main:256 - Result: {'ts_code': '881101.TI', 'status': 'success', 'count': 0, 'start': '20260101', 'end': '20260303'}
+2026-03-03 16:48:20.628 | INFO     | __main__:__init__:41 - IndustryDataCollector initialized, DB: quant_data_2026.db
+2026-03-03 16:48:20.726 | INFO     | __main__:main:256 - Result: {'ts_code': '881101.TI', 'status': 'empty', 'count': 0, 'message': 'No data'}
+2026-03-03 16:48:36.992 | INFO     | __main__:__init__:41 - IndustryDataCollector initialized, DB: quant_data_2026.db
+2026-03-03 16:48:37.993 | INFO     | __main__:main:256 - Result: {'ts_code': '881101.TI', 'status': 'success', 'count': 35, 'start': '20260101', 'end': '20260303'}
+2026-03-03 16:48:56.495 | INFO     | __main__:__init__:41 - IndustryDataCollector initialized, DB: quant_data_2026.db
+2026-03-03 16:48:56.495 | INFO     | __main__:main:251 - Starting 全量 industry data collection...
+2026-03-03 16:48:56.495 | INFO     | __main__:collect_all:167 - Starting to collect 90 industries...
+2026-03-03 16:48:56.496 | INFO     | __main__:collect_all:176 - Skipped 1 already completed
+2026-03-03 16:48:59.874 | INFO     | __main__:collect_all:189 - [10/89] 881116.TI: success, 已用 0.1 分, 速度 177.6 个/分, 进度 11.2%
+2026-03-03 16:49:03.209 | INFO     | __main__:collect_all:189 - [20/89] 881129.TI: success, 已用 0.1 分, 速度 178.7 个/分, 进度 22.5%
+2026-03-03 16:49:08.961 | INFO     | __main__:collect_all:189 - [30/89] 881139.TI: success, 已用 0.2 分, 速度 144.4 个/分, 进度 33.7%
+2026-03-03 16:49:22.126 | INFO     | __main__:collect_all:189 - [40/89] 881151.TI: success, 已用 0.4 分, 速度 93.6 个/分, 进度 44.9%
+2026-03-03 16:49:28.915 | INFO     | __main__:collect_all:189 - [50/89] 881164.TI: success, 已用 0.5 分, 速度 92.5 个/分, 进度 56.2%
+2026-03-03 16:49:32.768 | INFO     | __main__:collect_all:189 - [60/89] 881174.TI: success, 已用 0.6 分, 速度 99.3 个/分, 进度 67.4%
+2026-03-03 16:49:36.260 | INFO     | __main__:collect_all:189 - [70/89] 881265.TI: success, 已用 0.7 分, 速度 105.6 个/分, 进度 78.7%
+2026-03-03 16:49:41.710 | INFO     | __main__:collect_all:189 - [80/89] 881275.TI: success, 已用 0.8 分, 速度 106.2 个/分, 进度 89.9%
+2026-03-03 16:49:46.482 | INFO     | __main__:collect_all:189 - [89/89] 881284.TI: success, 已用 0.8 分, 速度 106.8 个/分, 进度 100.0%
+2026-03-03 16:49:46.482 | INFO     | __main__:collect_all:199 - ============================================================
+2026-03-03 16:49:46.482 | INFO     | __main__:collect_all:200 - 行业数据采集完成!
+2026-03-03 16:49:46.482 | INFO     | __main__:collect_all:201 - 成功: 89, 跳过: 0, 空数据: 0, 错误: 0
+2026-03-03 16:49:46.483 | INFO     | __main__:collect_all:202 - 总记录数: 3115
+2026-03-03 16:49:46.483 | INFO     | __main__:collect_all:203 - 总用时: 0.8 分钟
+2026-03-03 16:49:46.483 | INFO     | __main__:collect_all:204 - ============================================================
+2026-03-03 16:49:52.924 | INFO     | __main__:__init__:41 - IndustryDataCollector initialized, DB: quant_data_2026.db
+2026-03-03 16:55:41.841 | INFO     | __main__:__init__:41 - IndustryDataCollector initialized, DB: quant_data_2026.db
+2026-03-03 17:23:42.626 | INFO     | __main__:__init__:41 - IndustryDataCollector initialized, DB: quant_data_2026.db
+2026-03-03 17:23:43.047 | INFO     | __main__:main:262 - Result: {'ts_code': '881101.TI', 'status': 'success', 'count': 35, 'start': '20260101', 'end': '20260303'}
+2026-03-03 17:24:09.949 | INFO     | __main__:__init__:41 - IndustryDataCollector initialized, DB: quant_data_2026.db
+2026-03-03 17:24:09.949 | INFO     | __main__:main:257 - Starting 全量 industry data collection...
+2026-03-03 17:24:09.950 | INFO     | __main__:collect_all:173 - Starting to collect 90 industries...
+2026-03-03 17:24:09.950 | INFO     | __main__:collect_all:182 - Skipped 1 already completed
+2026-03-03 17:24:18.684 | INFO     | __main__:collect_all:195 - [10/89] 881116.TI: success, 已用 0.1 分, 速度 68.7 个/分, 进度 11.2%
+2026-03-03 17:24:27.775 | INFO     | __main__:collect_all:195 - [20/89] 881129.TI: success, 已用 0.3 分, 速度 67.3 个/分, 进度 22.5%
+2026-03-03 17:24:32.978 | INFO     | __main__:collect_all:195 - [30/89] 881139.TI: success, 已用 0.4 分, 速度 78.2 个/分, 进度 33.7%
+2026-03-03 17:24:36.504 | INFO     | __main__:collect_all:195 - [40/89] 881151.TI: success, 已用 0.4 分, 速度 90.4 个/分, 进度 44.9%
+2026-03-03 17:24:40.693 | INFO     | __main__:collect_all:195 - [50/89] 881164.TI: success, 已用 0.5 分, 速度 97.6 个/分, 进度 56.2%
+2026-03-03 17:24:44.780 | INFO     | __main__:collect_all:195 - [60/89] 881174.TI: success, 已用 0.6 分, 速度 103.4 个/分, 进度 67.4%
+2026-03-03 17:24:50.546 | INFO     | __main__:collect_all:195 - [70/89] 881265.TI: success, 已用 0.7 分, 速度 103.5 个/分, 进度 78.7%
+2026-03-03 17:24:57.810 | INFO     | __main__:collect_all:195 - [80/89] 881275.TI: success, 已用 0.8 分, 速度 100.3 个/分, 进度 89.9%
+2026-03-03 17:25:10.245 | INFO     | __main__:collect_all:195 - [89/89] 881284.TI: success, 已用 1.0 分, 速度 88.6 个/分, 进度 100.0%
+2026-03-03 17:25:10.246 | INFO     | __main__:collect_all:205 - ============================================================
+2026-03-03 17:25:10.246 | INFO     | __main__:collect_all:206 - 行业数据采集完成!
+2026-03-03 17:25:10.246 | INFO     | __main__:collect_all:207 - 成功: 89, 跳过: 0, 空数据: 0, 错误: 0
+2026-03-03 17:25:10.246 | INFO     | __main__:collect_all:208 - 总记录数: 3115
+2026-03-03 17:25:10.246 | INFO     | __main__:collect_all:209 - 总用时: 1.0 分钟
+2026-03-03 17:25:10.246 | INFO     | __main__:collect_all:210 - ============================================================
+2026-03-03 17:25:15.304 | INFO     | __main__:__init__:41 - IndustryDataCollector initialized, DB: quant_data_2026.db

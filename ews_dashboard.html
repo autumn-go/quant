@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>情绪加权扩散动量因子(EW-SDM) - A股涨停板适配版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .score-high { color: #dc2626; font-weight: bold; }
+        .score-mid { color: #ea580c; }
+        .score-low { color: #16a34a; }
+        .streak-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .streak-high { background: #fecaca; color: #991b1b; }
+        .streak-mid { background: #fed7aa; color: #9a3412; }
+        .streak-low { background: #bbf7d0; color: #166534; }
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            width: 20px;
+            height: 20px;
+            background: #3b82f6;
+            border-radius: 50%;
+            cursor: pointer;
+            -webkit-appearance: none;
+        }
+        .up-ratio-bar {
+            display: inline-block;
+            width: 60px;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-right: 8px;
+        }
+        .up-ratio-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #22c55e, #16a34a);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-6 max-w-7xl">
+        <!-- 头部 -->
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">🔥 情绪加权扩散动量因子(EW-SDM)</h1>
+            <p class="text-gray-600 mt-2">A股涨停板制度适配版 | 基于涨停封单+连板情绪的行业强度分析</p>
+        </div>
+
+        <!-- 数据概览 -->
+        <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-6">
+                    <div>
+                        <span class="text-sm text-gray-500">当前日期</span>
+                        <div class="text-xl font-bold text-blue-600" id="current-date">-</div>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-500">时间范围</span>
+                        <div class="text-lg font-semibold" id="date-range">-</div>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-500">参数</span>
+                        <div class="text-sm font-semibold">5日 / 3%阈值</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 时间轴控制 -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <div class="flex items-center gap-4 mb-4">
+                <span class="text-sm font-semibold text-gray-700">时间轴：</span>
+                <button id="btn-play" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">▶ 播放</button>
+                <button id="btn-pause" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 hidden">⏸ 暂停</button>
+            </div>
+            
+            <div class="slider-container">
+                <input type="range" id="time-slider" min="0" max="100" value="100">
+                <div class="flex justify-between text-xs text-gray-400 mt-2">
+                    <span id="start-date-label">2026-01-01</span>
+                    <span id="end-date-label">2026-03-04</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- EW-SDM排名榜单 -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-800">📋 行业EW-SDM排名</h2>
+                <div class="text-sm text-gray-500" id="industry-count">共 - 个行业</div>
+            </div>
+            
+            <div class="overflow-x-auto max-h-[600px] overflow-y-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-100 sticky top-0">
+                        <tr>
+                            <th class="px-3 py-3 text-left font-semibold text-gray-700">排名</th>
+                            <th class="px-3 py-3 text-left font-semibold text-gray-700">行业</th>
+                            <th class="px-3 py-3 text-right font-semibold text-gray-700">EW-SDM得分</th>
+                            <th class="px-3 py-3 text-right font-semibold text-gray-700">成分股</th>
+                            <th class="px-3 py-3 text-right font-semibold text-gray-700">上涨占比</th>
+                            <th class="px-3 py-3 text-center font-semibold text-gray-700">涨停</th>
+                            <th class="px-3 py-3 text-right font-semibold text-gray-700">情绪扩散</th>
+                            <th class="px-3 py-3 text-right font-semibold text-gray-700">动量</th>
+                            <th class="px-3 py-3 text-right font-semibold text-gray-700">杠杆</th>
+                            <th class="px-3 py-3 text-left font-semibold text-gray-700">详情</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ews-list" class="divide-y divide-gray-200">
+                        <!-- 动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 公式说明 -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mt-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">📐 计算公式说明</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div class="bg-gray-50 p-4 rounded">
+                    <div class="font-semibold text-gray-700 mb-2">1. 情绪加权扩散指数</div>
+                    <div class="text-gray-600">Emotion_Diff = Σ(S_i × V_i) / ΣV_i</div>
+                    <ul class="text-xs text-gray-500 mt-2 list-disc list-inside">
+                        <li>首板: S=1.5</li>
+                        <li>L连板: S=1+0.5L</li>
+                        <li>涨幅>3%: S=1.0</li>
+                        <li>炸板且跌幅≥5%: S=-1</li>
+                        <li>V=成交额+封单</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-gray-50 p-4 rounded">
+                    <div class="font-semibold text-gray-700 mb-2">2. 连板情绪杠杆</div>
+                    <div class="text-gray-600">S_score = 2/(1+e^-(Max-3.5)) + 1</div>
+                    <ul class="text-xs text-gray-500 mt-2 list-disc list-inside">
+                        <li>3-4板为情绪分水岭</li>
+                        <li>最高2倍杠杆</li>
+                        <li>Sigmoid平滑处理</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-gray-50 p-4 rounded">
+                    <div class="font-semibold text-gray-700 mb-2">3. 最终得分</div>
+                    <div class="text-gray-600">EW-SDM = 动量 × 情绪扩散 × 杠杆</div>
+                    <ul class="text-xs text-gray-500 mt-2 list-disc list-inside">
+                        <li>动量: 5日加权涨幅</li>
+                        <li>情绪: 涨停情绪扩散</li>
+                        <li>杠杆: 连板高度加成</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 内嵌数据
+        const EWS_DATA = {"daily_data": {"2026-03-04": [{"industry_code": "881180.TI", "industry_name": "石油石化", "ew_sdm_score": 8.42, "momentum": 4.21, "emotion_diffusion": 1.0, "streak_leverage": 2.0, "up_count": 19, "down_count": 9, "limit_up_count": 9, "max_streak": 3, "constituent_count": 28}, {"industry_code": "881163.TI", "industry_name": "建筑装饰", "ew_sdm_score": 4.38, "momentum": 2.19, "emotion_diffusion": 1.0, "streak_leverage": 2.0, "up_count": 49, "down_count": 93, "limit_up_count": 4, "max_streak": 3, "constituent_count": 142}, {"industry_code": "881105.TI", "industry_name": "建筑材料", "ew_sdm_score": 3.9, "momentum": 1.95, "emotion_diffusion": 1.0, "streak_leverage": 2.0, "up_count": 23, "down_count": 51, "limit_up_count": 2, "max_streak": 3, "constituent_count": 74}, {"industry_code": "881105.TI", "industry_name": "建筑材料", "ew_sdm_score": 3.9, "momentum": 1.95, "emotion_diffusion": 1.0, "streak_leverage": 2.0, "up_count": 23, "down_count": 51, "limit_up_count": 2, "max_streak": 3, "constituent_count": 74}, {"industry_code": "881105.TI", "industry_name": "建筑材料", "ew_sdm_score": 3.9, "momentum": 1.95, "emotion_diffusion": 1.0, "streak_leverage": 2.0, "up_count": 23, "down_count": 51, "limit_up_count": 2, "max_streak": 3, "constituent_count": 74}, {"industry_code": "881105.TI", "industry_name": "建筑材料", "ew_sdm_score": 3.9, "momentum": 1.95, "emotion_diffusion": 1.0, "streak_leverage": 2.0, "up_count": 23, "down_count": 51, "limit_up_count": 2, "max_streak": 3, "constituent_count": 74}, {"industry_code": "881105.TI", "industry_name": "建筑材料", "ew_sdm_score": 3.9, "momentum": 1.95, "emotion_diffusion": 1.0, "streak_leverage": 2.0, "up_count": 23, "down_count": 51, "limit_up_count": 2, "max_streak": 3, "constituent_count": 74}, {"industry_code": "881105.TI", "industry_name": "建筑材料", "ew_sdm_score": 3.9, "momentum": 1.95, "emotion_diffusion": 1.0, "streak_leverage": 2.0, "up_count": 23, "down_count": 51, "limit_up_count": 2, "max_streak": 3, "constituent_count": 74}, {"industry_code": "881105.TI", "industry_name": "建筑材料", "ew_sdm_score": 3.9, "momentum": 1.95, "emotion_diffusion": 1.0, "streak_leverage": 2.0, "up_count": 23, "down_count": 51, "limit_up_count": 2, "max_streak": 3, "constituent_count": 74}, {"industry_code": "881105.TI", "industry_name": "建筑材料", "ew_sdm_score": 3.9, "momentum": 1.95, "emotion_diffusion": 1.0, "streak_leverage": 2.0, "up_count": 23, "down_count": 51, "limit_up_count": 2, "max_streak": 3, "constituent_count": 74}, {"industry_code": "881105.TI", "industry_name": "建筑材料", "ew_sdm_score": 3.9, "momentum": 1.95, "emotion_diffusion": 1.0, "streak_leverage": 2.0, "up_count": 23, "down_count": 51, "limit_up_count": 2, "max_streak": 3, "constituent_count": 74}, {"industry_code": "881105.TI", "industry_name": "建筑材料", "ew_sdm_score": 3.9, "momentum": 1.95, "emotion_diffusion": 1.0, "streak_leverage": 2.0, "up_count": 23, "down_count": 51, "limit_up_count": 2, "max_streak": 3, "constituent_count": 74}, {"industry_code": "881105.TI", "industry_name": "建筑材料", "ew_sdm_score": 3.9, "momentum": 1.95, "emotion_diffusion": 1.0, "streak_leverage": 2.0, "up_count": 23, "down_count": 51, "limit_up_count": 2, "max_streak": 3, "constituent_count": 74}, {"industry_code": "881105.TI", "industry_name": "建筑材料", "ew_sdm_score": 3.9, "momentum": 1.95, "emotion_diffusion": 1.0, "streak_leverage": 2.0, "up_count": 23, "down_count": 51, "limit_up_count": 2, "max_streak": 3, "constituent_count": 74}, {"industry_code": "881105.TI", "industry_name": "建筑材料", "ew_sdm_score": 3.9, "momentum": 1.95, "emotion_diffusion": 1.0, "streak_leverage": 2.0, "up_count": 23, "down_count": 51, "limit_up_count": 2, "max_streak": 3, "constituent_count": 74}, {"industry_code": "881105.TI", "industry_name": "建筑材料", "ew_sdm_score": 3.9, "momentum": 1.95, "emotion_diffusion": 1.0, "streak_leverage": 2.0, "up_count": 23, "down_count": 51, "limit_up_count": 2, "max_streak": 3, "constituent_count": 74}, {"industry_code": "881105.TI", "industry_name": "建筑材料", "ew_sdm_score": 3.9, "momentum": 1.95, "emotion_diffusion": 1.0, "streak_leverage": 2.0, "up_count": 23, "down_count": 51, "limit_up_count": 2, "max_streak": 3, "constituent_count": 74}, {"industry_code": "881105.TI", "industry_name": "建筑材料", "ew_sdm_score": 3.9, "momentum": 1.95, "emotion_diffusion": 1.0, "streak_leverage": 2.0, "up_count": 23, "down_count": 51, "limit_up_count": 2, "max_streak": 3, "constituent_count": 74}, {"industry_code": "881105.TI", "industry_name": "建筑材料", "ew_sdm_score": 3.9, "momentum": 1.95, "emotion_diffusion": 1.0, "streak_leverage": 2.0, "up_count": 23, "down_count": 51, "limit_up_count": 2, "max_streak": 3, "constituent_count": 74}, {"industry_code": "881105.TI", "industry_name": "建筑材料", "ew_sdm_score": 3.9, "momentum": 1.95, "emotion_diffusion": 1.0, "streak_leverage": 2.0, "up_count": 23, "down_count": 51, "limit_up_count": 2, "max_streak": 3, "constituent_count": 74}]}};
+        
+        let currentDateIndex = 0;
+        let dates = [];
+        let isPlaying = false;
+        let playInterval = null;
+        
+        function init() {
+            if (!EWS_DATA || !EWS_DATA.daily_data) {
+                document.getElementById('ews-list').innerHTML = '<tr><td colspan="10" class="px-4 py-8 text-center text-gray-500">数据加载中...</td></tr>';
+                return;
+            }
+            
+            dates = Object.keys(EWS_DATA.daily_data).sort();
+            if (dates.length === 0) return;
+            
+            // 设置时间轴
+            const slider = document.getElementById('time-slider');
+            slider.min = 0;
+            slider.max = dates.length - 1;
+            slider.value = dates.length - 1;
+            currentDateIndex = dates.length - 1;
+            
+            document.getElementById('start-date-label').textContent = formatDate(dates[0]);
+            document.getElementById('end-date-label').textContent = formatDate(dates[dates.length - 1]);
+            document.getElementById('date-range').textContent = `${formatDate(dates[0])} ~ ${formatDate(dates[dates.length - 1])}`;
+            
+            slider.addEventListener('input', (e) => {
+                currentDateIndex = parseInt(e.target.value);
+                renderDay(dates[currentDateIndex]);
+            });
+            
+            // 播放控制
+            document.getElementById('btn-play').addEventListener('click', startPlay);
+            document.getElementById('btn-pause').addEventListener('click', stopPlay);
+            
+            // 渲染最后一天
+            renderDay(dates[currentDateIndex]);
+        }
+        
+        function formatDate(dateStr) {
+            return dateStr;
+        }
+        
+        function renderDay(date) {
+            document.getElementById('current-date').textContent = date;
+            
+            const data = EWS_DATA.daily_data[date];
+            if (!data || data.length === 0) {
+                document.getElementById('ews-list').innerHTML = '<tr><td colspan="10" class="px-4 py-8 text-center text-gray-500">暂无数据</td></tr>';
+                return;
+            }
+            
+            // 按得分排序
+            const sorted = [...data].sort((a, b) => b.ew_sdm_score - a.ew_sdm_score);
+            
+            document.getElementById('industry-count').textContent = `共 ${sorted.length} 个行业`;
+            
+            const tbody = document.getElementById('ews-list');
+            tbody.innerHTML = '';
+            
+            sorted.forEach((item, index) => {
+                const upRatio = item.constituent_count > 0 ? (item.up_count / item.constituent_count * 100) : 0;
+                const scoreClass = item.ew_sdm_score > 5 ? 'score-high' : (item.ew_sdm_score > 2 ? 'score-mid' : 'score-low');
+                
+                // 连板标签
+                let streakBadge = '-';
+                if (item.max_streak >= 5) {
+                    streakBadge = `<span class="streak-badge streak-high">${item.max_streak}板</span>`;
+                } else if (item.max_streak >= 3) {
+                    streakBadge = `<span class="streak-badge streak-mid">${item.max_streak}板</span>`;
+                } else if (item.max_streak > 0) {
+                    streakBadge = `<span class="streak-badge streak-low">${item.max_streak}板</span>`;
+                }
+                
+                // 涨停数量显示
+                const limitUpDisplay = item.limit_up_count > 0 
+                    ? `<span class="text-red-600 font-semibold">${item.limit_up_count}</span>` 
+                    : '-';
+                
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="px-3 py-3">${index + 1}</td>
+                    <td class="px-3 py-3 font-medium text-gray-800">${item.industry_name}</td>
+                    <td class="px-3 py-3 text-right ${scoreClass}">${item.ew_sdm_score.toFixed(2)}</td>
+                    <td class="px-3 py-3 text-right text-gray-600">${item.constituent_count}</td>
+                    <td class="px-3 py-3 text-right">
+                        <span class="up-ratio-bar"><span class="up-ratio-fill" style="width: ${upRatio}%"></span></span>
+                        <span class="text-gray-600">${upRatio.toFixed(1)}%</span>
+                    </td>
+                    <td class="px-3 py-3 text-center">${limitUpDisplay}</td>
+                    <td class="px-3 py-3 text-right text-gray-600">${item.emotion_diffusion.toFixed(2)}</td>
+                    <td class="px-3 py-3 text-right text-gray-600">${item.momentum.toFixed(2)}</td>
+                    <td class="px-3 py-3 text-right text-gray-600">${item.streak_leverage.toFixed(2)}</td>
+                    <td class="px-3 py-3 text-sm text-gray-500">
+                        <span class="text-green-600">${item.up_count}涨</span> / 
+                        <span class="text-red-600">${item.down_count}跌</span>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        function startPlay() {
+            if (isPlaying) return;
+            isPlaying = true;
+            document.getElementById('btn-play').classList.add('hidden');
+            document.getElementById('btn-pause').classList.remove('hidden');
+            
+            playInterval = setInterval(() => {
+                currentDateIndex++;
+                if (currentDateIndex >= dates.length) {
+                    currentDateIndex = 0;
+                }
+                document.getElementById('time-slider').value = currentDateIndex;
+                renderDay(dates[currentDateIndex]);
+            }, 1000);
+        }
+        
+        function stopPlay() {
+            isPlaying = false;
+            if (playInterval) {
+                clearInterval(playInterval);
+                playInterval = null;
+            }
+            document.getElementById('btn-play').classList.remove('hidden');
+            document.getElementById('btn-pause').classList.add('hidden');
+        }
+        
+        // 初始化
+        init();
+    </script>
+</body>
+</html>
